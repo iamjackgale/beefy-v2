@@ -1,5 +1,43 @@
 [
   {
+    "id": "morpho-v2-eth-kpk-usdc-prime-v2",
+    "name": "USDC (KPK Prime v2)",
+    "type": "standard",
+    "token": "USDC",
+    "tokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "tokenDecimals": 6,
+    "tokenProviderId": "morpho",
+    "earnedToken": "mooMorphoV2EthUSDC",
+    "earnedTokenAddress": "0xfa0346E0AFad914307738D8451dD7dD7C8F28cbd",
+    "earnContractAddress": "0xfa0346E0AFad914307738D8451dD7dD7C8F28cbd",
+    "oracle": "lps",
+    "oracleId": "USDC",
+    "createdAt": 1777468325,
+    "status": "active",
+    "platformId": "morpho",
+    "curatorId": "kpk",
+    "assets": ["USDC"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "addLiquidityUrl": "https://app.morpho.org/ethereum/vault/0x4Ef53d2cAa51C447fdFEEedee8F07FD1962C9ee6/kpk-usdc-prime-v2#overview",
+    "network": "ethereum",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
     "id": "stakedao-musd-2pool",
     "name": "MUSD/USDC/USDT",
     "type": "standard",
