@@ -1,6 +1,6 @@
 [
   {
-    "id": "morpho-v2-eth-kpk-usdc-prime-v2",
+    "id": "morpho-eth-kpk-usdc",
     "name": "USDC (KPK Prime v2)",
     "type": "standard",
     "token": "USDC",
