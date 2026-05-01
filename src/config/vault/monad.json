@@ -1,7 +1,7 @@
 [
   {
     "id": "morpho-v2-monad-hyperithm-apex-cbbtc",
-    "name": "cbBTC (Hyperithm, Apex)",
+    "name": "cbBTC (Hyperithm, Apex V2)",
     "type": "standard",
     "token": "cbBTC",
     "tokenAddress": "0xd18B7EC58Cdf4876f6AFebd3Ed1730e4Ce10414b",

@@ -1,7 +1,44 @@
 [
   {
+    "id": "morpho-v2-ethereum-steakhouse-prime-instant-pyusd",
+    "name": "PYUSD (Steakhouse, Prime Instant V2)",
+    "type": "standard",
+    "token": "PYUSD",
+    "tokenAddress": "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8",
+    "tokenDecimals": 6,
+    "earnContractAddress": "0x78446686966D11644df5851A1b1dEBF5138B36cD",
+    "earnedToken": "mooMorphoV2EthereumSteakhousePrimeInstantPYUSD",
+    "earnedTokenAddress": "0x78446686966D11644df5851A1b1dEBF5138B36cD",
+    "oracle": "tokens",
+    "oracleId": "PYUSD",
+    "status": "active",
+    "createdAt": 1777621616,
+    "platformId": "morpho",
+    "curatorId": "steakhouse",
+    "assets": ["PYUSD"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/ethereum/vault/0xbeef00B5d83C1188F07A5184230a805639c39f04/steakhouse-prime-instant-pyusd",
+    "network": "ethereum",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
     "id": "morpho-v2-ethereum-steakhouse-high-yield-usdt",
-    "name": "USDT (Steakhouse, High Yield)",
+    "name": "USDT (Steakhouse, High Yield V2)",
     "type": "standard",
     "token": "USDT",
     "tokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -38,7 +75,7 @@
   },
   {
     "id": "morpho-v2-ethereum-steakhouse-high-yield-instant-ausd",
-    "name": "AUSD (Steakhouse, High Yield Instant)",
+    "name": "AUSD (Steakhouse, High Yield Instant V2)",
     "type": "standard",
     "token": "AUSD",
     "tokenAddress": "0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a",
@@ -74,45 +111,8 @@
     ]
   },
   {
-    "id": "morpho-v2-ethereum-steakhouse-prime-frxusd",
-    "name": "frxUSD (Steakhouse, Prime)",
-    "type": "standard",
-    "token": "frxUSD",
-    "tokenAddress": "0xCAcd6fd266aF91b8AeD52aCCc382b4e165586E29",
-    "tokenDecimals": 18,
-    "earnContractAddress": "0xC69281FfD1561C0916A1EDC7621b5b578f9357a6",
-    "earnedToken": "mooMorphoV2EthereumSteakhousePrimefrxUSD",
-    "earnedTokenAddress": "0xC69281FfD1561C0916A1EDC7621b5b578f9357a6",
-    "oracle": "tokens",
-    "oracleId": "frxUSD",
-    "status": "active",
-    "createdAt": 1777584953,
-    "platformId": "morpho",
-    "curatorId": "steakhouse",
-    "assets": ["frxUSD"],
-    "migrationIds": ["morpho"],
-    "risks": {
-      "complex": false,
-      "curated": true,
-      "notAudited": false,
-      "notBattleTested": false,
-      "notCorrelated": false,
-      "notTimelocked": false,
-      "notVerified": false,
-      "synthAsset": false
-    },
-    "strategyTypeId": "single",
-    "underlyingPlatformUrl": "https://app.morpho.org/ethereum/vault/0xbeef009FF4FB1727297BF2526806F4A73E4b99aD/steakhouse-prime-frxusd",
-    "network": "ethereum",
-    "zaps": [
-      {
-        "strategyId": "single"
-      }
-    ]
-  },
-  {
     "id": "morpho-v2-ethereum-steakhouse-high-yield-usdc",
-    "name": "USDC (Steakhouse, High Yield)",
+    "name": "USDC (Steakhouse, High Yield V2)",
     "type": "standard",
     "token": "USDC",
     "tokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
