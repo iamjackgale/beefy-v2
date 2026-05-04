@@ -1,5 +1,5 @@
 [
-    {
+  {
     "id": "morpho-v2-ethereum-steakhouse-prime-instant-pyusd",
     "name": "PYUSD (Steakhouse, Prime Instant V2)",
     "type": "standard",
@@ -84,12 +84,12 @@
     "earnedToken": "mooMorphoV2EthereumSteakhouseHighYieldInstantAUSD",
     "earnedTokenAddress": "0x3988C372513F854Bb5fb980fF135567909012Bda",
     "oracle": "tokens",
-    "oracleId": "AUSD",
+    "oracleId": "ethAUSD",
     "status": "active",
     "createdAt": 1777884830,
     "platformId": "morpho",
     "curatorId": "steakhouse",
-    "assets": ["AUSD"],
+    "assets": ["ethAUSD"],
     "migrationIds": ["morpho"],
     "risks": {
       "complex": false,
