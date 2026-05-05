@@ -9613,7 +9613,7 @@
   },
   {
     "id": "morpho-base-steakhouse-prime-eurc",
-    "name": "EURC (Steakhouse, Prime)",
+    "name": "EURC (Steakhouse, Prime V2)",
     "token": "EURC",
     "tokenAddress": "0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42",
     "tokenDecimals": 6,
@@ -9649,7 +9649,7 @@
   },
   {
     "id": "morpho-base-gauntlet-prime-usdc",
-    "name": "USDC (Gauntlet, Prime)",
+    "name": "USDC (Gauntlet, Prime V2)",
     "token": "USDC",
     "tokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     "tokenDecimals": 6,
@@ -9685,7 +9685,7 @@
   },
   {
     "id": "morpho-base-gauntlet-frontier-usdc",
-    "name": "USDC (Gauntlet, Frontier)",
+    "name": "USDC (Gauntlet, Frontier V2)",
     "token": "USDC",
     "tokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     "tokenDecimals": 6,
@@ -9721,7 +9721,7 @@
   },
   {
     "id": "morpho-base-steakhouse-high-yield-usdc",
-    "name": "USDC (Steakhouse, High Yield)",
+    "name": "USDC (Steakhouse, High Yield V2)",
     "token": "USDC",
     "tokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
     "tokenDecimals": 6,
