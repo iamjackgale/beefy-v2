@@ -1,5 +1,153 @@
 [
   {
+    "id": "morpho-v2-base-clearstar-reactor-usdc",
+    "name": "USDC (Clearstar, Reactor V2)",
+    "type": "standard",
+    "token": "USDC",
+    "tokenAddress": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "tokenDecimals": 6,
+    "earnContractAddress": "0x3D4f7cC6C534c9b34914DFFceC52Bb8214455a74",
+    "earnedToken": "mooMorphoV2BaseClearstarReactorUSDC",
+    "earnedTokenAddress": "0x3D4f7cC6C534c9b34914DFFceC52Bb8214455a74",
+    "oracle": "tokens",
+    "oracleId": "USDC",
+    "status": "active",
+    "createdAt": 1777979001,
+    "platformId": "morpho",
+    "curatorId": "clearstar",
+    "assets": ["USDC"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/base/vault/0x116e1A65717A534B73EcB7d4F6543c65DBCd0E46/clearstar-reactor-usdc",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
+    "id": "morpho-v2-base-yearn-og-weth",
+    "name": "WETH (Yearn, OG V2)",
+    "type": "standard",
+    "token": "WETH",
+    "tokenAddress": "0x4200000000000000000000000000000000000006",
+    "tokenDecimals": 18,
+    "earnContractAddress": "0xFCaF61Be9eF740a4C4622403D1aC753F9925a9B1",
+    "earnedToken": "mooMorphoV2BaseYearnOGWETH",
+    "earnedTokenAddress": "0xFCaF61Be9eF740a4C4622403D1aC753F9925a9B1",
+    "oracle": "tokens",
+    "oracleId": "WETH",
+    "status": "active",
+    "createdAt": 1777977819,
+    "platformId": "morpho",
+    "curatorId": "yearn",
+    "assets": ["WETH"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/base/vault/0x2EfD54529329AD364B8Df988CE3BAb5Ff256ab3E/yearn-og-weth-v2",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
+    "id": "morpho-v2-base-steakhouse-prime-weth",
+    "name": "WETH (Steakhouse, Prime V2)",
+    "type": "standard",
+    "token": "WETH",
+    "tokenAddress": "0x4200000000000000000000000000000000000006",
+    "tokenDecimals": 18,
+    "earnContractAddress": "0xd0ab1bb92B689236DC0Bc7a2f9aEDC5F90cE4389",
+    "earnedToken": "mooMorphoV2BaseSteakhousePrimeWETH",
+    "earnedTokenAddress": "0xd0ab1bb92B689236DC0Bc7a2f9aEDC5F90cE4389",
+    "oracle": "tokens",
+    "oracleId": "WETH",
+    "status": "active",
+    "createdAt": 1777977601,
+    "platformId": "morpho",
+    "curatorId": "steakhouse",
+    "assets": ["WETH"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/base/vault/0xbeef00f0A818894a2Cf111644A5098421611100E/steakhouse-prime-weth",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
+    "id": "morpho-v2-base-gauntlet-balanced-weth",
+    "name": "WETH (Gauntlet, Balanced V2)",
+    "type": "standard",
+    "token": "WETH",
+    "tokenAddress": "0x4200000000000000000000000000000000000006",
+    "tokenDecimals": 18,
+    "earnContractAddress": "0x1DA48d1c79D527859ACD341A0B9456b27f4b6f5B",
+    "earnedToken": "mooMorphoV2BaseGauntletBalancedWETH",
+    "earnedTokenAddress": "0x1DA48d1c79D527859ACD341A0B9456b27f4b6f5B",
+    "oracle": "tokens",
+    "oracleId": "WETH",
+    "status": "active",
+    "createdAt": 1777977107,
+    "platformId": "morpho",
+    "curatorId": "gauntlet",
+    "assets": ["WETH"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/base/vault/0xFeFeC33668E22677c4762d0853d56245a800ff08/gauntlet-weth-balanced",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
     "id": "aerodrome-cow-base-usdc-cbmega-vault",
     "name": "USDC-cbMEGA",
     "type": "standard",
