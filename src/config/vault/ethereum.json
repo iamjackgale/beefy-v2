@@ -11,7 +11,7 @@
     "earnContractAddress": "0xfa0346E0AFad914307738D8451dD7dD7C8F28cbd",
     "oracle": "tokens",
     "oracleId": "USDC",
-    "createdAt": 1777939714,
+    "createdAt": 1777960086,
     "status": "active",
     "platformId": "morpho",
     "curatorId": "kpk",
@@ -33,6 +33,55 @@
     "zaps": [
       {
         "strategyId": "single"
+      }
+    ]
+  },
+  {
+    "id": "stakedao-frxusd-msusd",
+    "name": "frxUSD/msUSD",
+    "type": "standard",
+    "token": "FrxMsUSD",
+    "tokenAddress": "0x9A9e2e70919c75D80aAaA1D483c46CdBb8ac4d1b",
+    "tokenDecimals": 18,
+    "tokenProviderId": "curve",
+    "earnContractAddress": "0xD84F7431ce7b4C5289C0de346C7BC7Dc5FFBF6f5",
+    "earnedToken": "mooStakeDao-frxUSD-msUSD",
+    "earnedTokenAddress": "0xD84F7431ce7b4C5289C0de346C7BC7Dc5FFBF6f5",
+    "oracle": "lps",
+    "oracleId": "curve-frxusd-msusd",
+    "status": "active",
+    "createdAt": 1777960085,
+    "platformId": "stakedao",
+    "assets": ["frxUSD", "msUSD"],
+    "migrationIds": ["ethereum-convex", "ethereum-curve"],
+    "risks": {
+      "complex": false,
+      "curated": false,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "multi-lp",
+    "addLiquidityUrl": "https://www.curve.finance/dex/ethereum/pools/factory-stable-ng-599/deposit",
+    "removeLiquidityUrl": "https://www.curve.finance/dex/ethereum/pools/factory-stable-ng-599/withdraw",
+    "network": "ethereum",
+    "zaps": [
+      {
+        "strategyId": "curve",
+        "poolAddress": "0x9A9e2e70919c75D80aAaA1D483c46CdBb8ac4d1b",
+        "methods": [
+          {
+            "type": "dynamic-deposit",
+            "target": "0x9A9e2e70919c75D80aAaA1D483c46CdBb8ac4d1b",
+            "coins": [
+              "0xCAcd6fd266aF91b8AeD52aCCc382b4e165586E29",
+              "0xab5eB14c09D416F0aC63661E57EDB7AEcDb9BEfA"
+            ]
+          }
+        ]
       }
     ]
   },
