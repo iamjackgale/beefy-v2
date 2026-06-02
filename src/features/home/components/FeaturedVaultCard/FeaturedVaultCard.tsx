@@ -1,9 +1,9 @@
 import { css } from '@repo/styles/css';
 import { styled } from '@repo/styles/jsx';
-import { memo, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
-import { useResizeDetector } from 'react-resize-detector';
+import { memo } from 'react';
 import { Link } from 'react-router';
 import { ChainIcon } from '../../../../components/ChainIcon/ChainIcon.tsx';
+import { Marquee } from '../../../../components/Marquee/Marquee.tsx';
 import { VaultIdImage } from '../../../../components/TokenImage/TokenImage.tsx';
 import { VaultTags } from '../../../../components/VaultIdentity/components/VaultTags/VaultTags.tsx';
 import { VaultApyStat } from '../../../../components/VaultStats/VaultApyStat.tsx';
@@ -24,7 +24,7 @@ export const FeaturedVaultCard = memo(function FeaturedVaultCard({
 }: FeaturedVaultCardProps) {
   const vault = useAppSelector(state => selectVaultById(state, vaultId));
   const chain = useAppSelector(state => selectChainById(state, vault.chainId));
-  const isGradient = chain?.brand?.icon === 'gradient';
+  const isGradient = chain.brand?.icon === 'gradient';
 
   const imageSize = vault.assetIds.length === 1 ? 32 : 40;
 
@@ -40,19 +40,21 @@ export const FeaturedVaultCard = memo(function FeaturedVaultCard({
       </ChainBadge>
       <Identity>
         <HeadTop>
-          <MarqueeName text={punctuationWrap(vault.names.list)} />
+          <Marquee className={nameContentClass}>{punctuationWrap(vault.names.list)}</Marquee>
           <HeadIcon>
             <VaultIdImage vaultId={vaultId} size={imageSize} />
           </HeadIcon>
         </HeadTop>
-        <MarqueeTags vaultId={vaultId} />
+        <Marquee className={tagsContentClass}>
+          <VaultTags vaultId={vaultId} />
+        </Marquee>
       </Identity>
       <Stats>
         <StatColumn>
           <FeaturedVaultApyLabel />
-          <VaultApyStat vaultId={vaultId} type="yearly" hideLabel align="left" />
+          <VaultApyStat vaultId={vaultId} type="yearly" showLabel={false} align="left" />
         </StatColumn>
-        <VaultTvlStat vaultId={vaultId} keepLabel align="left" hideSubValue />
+        <VaultTvlStat vaultId={vaultId} showLabel align="left" hideSubValue />
       </Stats>
     </Card>
   );
@@ -72,10 +74,16 @@ const Card = styled(Link, {
     textDecoration: 'none',
     color: 'text.middle',
     background: 'background.cardBody',
-    _hover: {
-      '--featured-tags-fade-right-animation': 'featuredVaultMarqueeFade',
-      '--featured-tags-fade-left-animation': 'featuredVaultMarqueeFadeLeft',
-    },
+  },
+});
+
+// Content styling passed into the marquees (Marquee owns only structure/animation).
+const nameContentClass = css({ textStyle: 'h3', color: 'text.light' });
+const tagsContentClass = css({
+  '& > *': {
+    marginTop: '0',
+    columnGap: '4px',
+    rowGap: '4px',
   },
 });
 
@@ -124,192 +132,6 @@ const HeadIcon = styled('div', {
     transform: 'translateY(-50%)',
     lineHeight: '0',
     pointerEvents: 'none',
-  },
-});
-
-type MarqueeNameProps = { text: string };
-
-// Scroll the looping name at a constant speed so longer names take proportionally
-// longer (rather than every name sharing a fixed duration).
-const MARQUEE_SCROLL_SPEED_PX_PER_S = 40;
-
-const MarqueeName = memo(function MarqueeName({ text }: MarqueeNameProps) {
-  const innerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const { width: viewportWidth, ref: viewportRef } = useResizeDetector<HTMLDivElement>();
-  const [isOverflowing, setIsOverflowing] = useState(false);
-  const [duration, setDuration] = useState(0);
-
-  useLayoutEffect(() => {
-    const inner = innerRef.current;
-    const viewport = viewportRef.current;
-    if (!inner || !viewport) {
-      setIsOverflowing(false);
-      return;
-    }
-    setIsOverflowing(inner.scrollWidth > viewport.clientWidth);
-  }, [text, viewportWidth, viewportRef]);
-
-  useLayoutEffect(() => {
-    const track = trackRef.current;
-    if (!track || !isOverflowing) {
-      setDuration(0);
-      return;
-    }
-    // The loop translates by -50% of the track, i.e. exactly one copy (text + its
-    // trailing gap) = half the two-copy track width. duration = distance / speed.
-    const distance = track.scrollWidth / 2;
-    setDuration(distance / MARQUEE_SCROLL_SPEED_PX_PER_S);
-  }, [isOverflowing, text, viewportWidth]);
-
-  const style = { '--marquee-duration': `${duration}s` } as CSSProperties;
-
-  return (
-    <NameViewport ref={viewportRef} data-overflowing={isOverflowing || undefined} style={style}>
-      <NameTrack ref={trackRef}>
-        <NameInner ref={innerRef}>{text}</NameInner>
-        {isOverflowing ?
-          <NameInner aria-hidden="true">{text}</NameInner>
-        : null}
-      </NameTrack>
-    </NameViewport>
-  );
-});
-
-const NameViewport = styled('div', {
-  base: {
-    position: 'relative',
-    flex: '1 1 auto',
-    minWidth: '0',
-    overflow: 'hidden',
-    '&[data-overflowing]::after': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      right: '0',
-      bottom: '0',
-      width: '32px',
-      pointerEvents: 'none',
-      zIndex: '[1]',
-      background:
-        'linear-gradient(to right, rgba(36, 40, 66, 0) 0%, {colors.background.cardBody} 100%)',
-    },
-    '&[data-overflowing]::before': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      left: '0',
-      bottom: '0',
-      width: '32px',
-      pointerEvents: 'none',
-      zIndex: '[1]',
-      background:
-        'linear-gradient(to right, {colors.background.cardBody} 0%, rgba(36, 40, 66, 0) 100%)',
-    },
-  },
-});
-
-const NameTrack = styled('div', {
-  base: {
-    display: 'flex',
-    width: 'max-content',
-    willChange: 'transform',
-    '[data-overflowing] > &': {
-      animation: 'featuredVaultMarqueeLoop var(--marquee-duration, 10s) linear infinite',
-    },
-  },
-});
-
-const NameInner = styled('div', {
-  base: {
-    display: 'inline-block',
-    textStyle: 'h3',
-    color: 'text.light',
-    whiteSpace: 'nowrap',
-    '[data-overflowing] &': {
-      paddingRight: '48px',
-    },
-  },
-});
-
-type MarqueeTagsProps = { vaultId: VaultEntity['id'] };
-
-const MarqueeTags = memo(function MarqueeTags({ vaultId }: MarqueeTagsProps) {
-  const innerRef = useRef<HTMLDivElement>(null);
-  const { width: viewportWidth, ref: viewportRef } = useResizeDetector<HTMLDivElement>();
-  const [overflowPx, setOverflowPx] = useState(0);
-
-  useLayoutEffect(() => {
-    const inner = innerRef.current;
-    const viewport = viewportRef.current;
-    if (!inner || !viewport) {
-      setOverflowPx(0);
-      return;
-    }
-    const diff = inner.scrollWidth - viewport.clientWidth;
-    setOverflowPx(diff > 0 ? diff : 0);
-  }, [vaultId, viewportWidth, viewportRef]);
-
-  const isOverflowing = overflowPx > 0;
-  const style = { '--marquee-shift': `-${overflowPx}px` } as CSSProperties;
-
-  return (
-    <TagsViewport ref={viewportRef} data-overflowing={isOverflowing || undefined} style={style}>
-      <TagsInner ref={innerRef}>
-        <VaultTags vaultId={vaultId} />
-      </TagsInner>
-    </TagsViewport>
-  );
-});
-
-const TagsViewport = styled('div', {
-  base: {
-    position: 'relative',
-    minWidth: '0',
-    overflow: 'hidden',
-    '&[data-overflowing]::after': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      right: '0',
-      bottom: '0',
-      width: '32px',
-      pointerEvents: 'none',
-      zIndex: '[1]',
-      background:
-        'linear-gradient(to right, rgba(36, 40, 66, 0) 0%, {colors.background.cardBody} 100%)',
-      animation: 'var(--featured-tags-fade-right-animation, none) 6s ease-in-out infinite',
-    },
-    '&[data-overflowing]::before': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      left: '0',
-      bottom: '0',
-      width: '32px',
-      pointerEvents: 'none',
-      zIndex: '[1]',
-      background:
-        'linear-gradient(to right, {colors.background.cardBody} 0%, rgba(36, 40, 66, 0) 100%)',
-      opacity: '0',
-      animation: 'var(--featured-tags-fade-left-animation, none) 6s ease-in-out infinite',
-    },
-  },
-});
-
-const TagsInner = styled('div', {
-  base: {
-    display: 'block',
-    width: 'max-content',
-    willChange: 'transform',
-    '& > *': {
-      marginTop: '0',
-      columnGap: '4px',
-      rowGap: '4px',
-    },
-    'a:hover [data-overflowing] > &': {
-      animation: 'featuredVaultMarquee 6s ease-in-out infinite',
-    },
   },
 });
 

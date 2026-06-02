@@ -40,24 +40,33 @@ export const FeaturedVaults = memo(function FeaturedVaults() {
     const scroller = scrollerRef.current;
     if (!isListing || !scroller) return;
 
-    let ticking = false;
+    let rafId = 0;
     const update = () => {
-      ticking = false;
+      rafId = 0;
       const stride = scroller.clientWidth + GAP_PX;
       if (stride <= 0) return;
-      const idx = Math.min(pageCount - 1, Math.max(0, Math.round(scroller.scrollLeft / stride)));
+      const maxScroll = scroller.scrollWidth - scroller.clientWidth;
+      // A partial last page can't scroll a full viewport-width from the start (its
+      // first card is pinned to the right edge), so stride-rounding never reaches
+      // the last index. Snap the active page to the last when scrolled to the end.
+      const idx =
+        scroller.scrollLeft >= maxScroll - 1 ?
+          pageCount - 1
+        : Math.min(pageCount - 1, Math.max(0, Math.round(scroller.scrollLeft / stride)));
       setActivePage(idx);
     };
     const onScroll = () => {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
+      if (!rafId) {
+        rafId = requestAnimationFrame(update);
       }
     };
 
     update();
     scroller.addEventListener('scroll', onScroll, { passive: true });
-    return () => scroller.removeEventListener('scroll', onScroll);
+    return () => {
+      scroller.removeEventListener('scroll', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [isListing, pageCount]);
 
   const handleDotClick = useCallback((pageIdx: number) => {
@@ -74,6 +83,19 @@ export const FeaturedVaults = memo(function FeaturedVaults() {
     let didDrag = false;
     let startX = 0;
     let startScrollLeft = 0;
+    let capturedPointerId: number | null = null;
+
+    // Idempotent: releases pointer capture and clears the inline drag styles.
+    const resetDrag = () => {
+      if (capturedPointerId !== null) {
+        if (scroller.hasPointerCapture(capturedPointerId)) {
+          scroller.releasePointerCapture(capturedPointerId);
+        }
+        capturedPointerId = null;
+      }
+      scroller.style.scrollSnapType = '';
+      scroller.style.cursor = '';
+    };
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.pointerType !== 'mouse') return;
@@ -87,6 +109,7 @@ export const FeaturedVaults = memo(function FeaturedVaults() {
       const dx = e.clientX - startX;
       if (!didDrag && Math.abs(dx) > DRAG_THRESHOLD_PX) {
         didDrag = true;
+        capturedPointerId = e.pointerId;
         scroller.setPointerCapture(e.pointerId);
         scroller.style.scrollSnapType = 'none';
         scroller.style.cursor = 'grabbing';
@@ -97,8 +120,7 @@ export const FeaturedVaults = memo(function FeaturedVaults() {
     };
     const endDrag = () => {
       if (didDrag) {
-        scroller.style.scrollSnapType = '';
-        scroller.style.cursor = '';
+        resetDrag();
       }
       isDown = false;
     };
@@ -121,6 +143,8 @@ export const FeaturedVaults = memo(function FeaturedVaults() {
       scroller.removeEventListener('pointerup', endDrag);
       scroller.removeEventListener('pointercancel', endDrag);
       scroller.removeEventListener('click', onClickCapture, true);
+      // If torn down mid-drag, no pointerup fires — undo styles & release capture.
+      resetDrag();
     };
   }, [isListing]);
 
@@ -141,7 +165,7 @@ export const FeaturedVaults = memo(function FeaturedVaults() {
               <Dot
                 key={i}
                 type="button"
-                data-active={i === activePage || undefined}
+                active={i === activePage}
                 aria-label={`Go to page ${i + 1}`}
                 onClick={() => handleDotClick(i)}
               />
@@ -149,12 +173,12 @@ export const FeaturedVaults = memo(function FeaturedVaults() {
           </Dots>
         )}
       </Header>
-      <Scroller ref={scrollerRef} data-listing={isListing || undefined}>
+      <Scroller ref={scrollerRef} listing={isListing}>
         {ids.map((id, index) => (
           <CardSlot
             key={id}
-            data-listing={isListing || undefined}
-            data-page-start={index % pageSize === 0 || undefined}
+            listing={isListing}
+            pageStart={index % pageSize === 0}
             style={{
               flexBasis:
                 isSideBySide ?
@@ -245,9 +269,15 @@ const Dot = styled('button', {
       opacity: 0.4,
       transition: 'opacity 120ms ease, background 120ms ease',
     },
-    '&[data-active]::before': {
-      opacity: 1,
-      background: 'text.light',
+  },
+  variants: {
+    active: {
+      true: {
+        '&::before': {
+          opacity: 1,
+          background: 'text.light',
+        },
+      },
     },
   },
 });
@@ -259,12 +289,16 @@ const Scroller = styled('div', {
     minWidth: '0',
     width: '100%',
     columnGap: '2px',
-    '&[data-listing]': {
-      overflowX: 'auto',
-      scrollSnapType: 'x mandatory',
-      scrollbarWidth: 'none',
-      '&::-webkit-scrollbar': {
-        display: 'none',
+  },
+  variants: {
+    listing: {
+      true: {
+        overflowX: 'auto',
+        scrollSnapType: 'x mandatory',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
       },
     },
   },
@@ -276,8 +310,16 @@ const CardSlot = styled('div', {
     minWidth: '0',
     flexGrow: 1,
     flexShrink: 0,
-    '&[data-listing][data-page-start]': {
-      scrollSnapAlign: 'start',
-    },
   },
+  variants: {
+    listing: { true: {} },
+    pageStart: { true: {} },
+  },
+  compoundVariants: [
+    {
+      listing: true,
+      pageStart: true,
+      css: { scrollSnapAlign: 'start' },
+    },
+  ],
 });

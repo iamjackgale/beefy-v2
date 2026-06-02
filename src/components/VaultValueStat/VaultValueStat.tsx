@@ -11,10 +11,14 @@ type ValueHolderVariantProps = StyledVariantProps<typeof ValueHolder>;
 export type VaultValueStatProps = {
   /** label to show on mobile (when there are no colum headers) */
   label: string;
-  /** hide the mobile label */
-  hideLabel?: boolean;
-  /** keep the label visible at all breakpoints (overrides the default mobile-only behavior) */
-  keepLabel?: boolean;
+  /**
+   * Controls label visibility:
+   * - `false` — don't render the label
+   * - `true` — keep it visible at all breakpoints
+   * - a breakpoint (`'sm' | 'md' | 'lg'`) — visible below it, hidden from it up
+   * @default 'lg'
+   */
+  showLabel?: boolean | 'sm' | 'md' | 'lg';
   /** tooltip content to show for entire stat */
   tooltip?: ReactNode;
   /** value for line one */
@@ -48,8 +52,7 @@ export const VaultValueStat = memo(function VaultValueStat({
   blur = false,
   loading = false,
   boosted,
-  hideLabel = false,
-  keepLabel = false,
+  showLabel = 'lg',
   Icon,
   textWrap = true,
   ...rest
@@ -58,7 +61,7 @@ export const VaultValueStat = memo(function VaultValueStat({
 
   return (
     <Layout {...rest}>
-      {!hideLabel && <Label to={keepLabel ? 'never' : 'lg'}>{label}</Label>}
+      {showLabel !== false && <Label to={showLabel === true ? 'never' : showLabel}>{label}</Label>}
       <Values tooltip={tooltip} disabled={!tooltip}>
         <ValueHolder kind="primary" textWrap={textWrap} boosted={boosted}>
           {loading ?
