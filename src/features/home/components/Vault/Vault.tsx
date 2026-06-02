@@ -11,6 +11,7 @@ import {
   isCowcentratedStandardVault,
   isCowcentratedVault,
   isGovVault,
+  isVaultFreeZap,
   isVaultRetired,
   type VaultEntity,
 } from '../../../data/entities/vault.ts';
@@ -30,6 +31,7 @@ export const Vault = memo(function Vault({ vaultId }: VaultProps) {
   const isCowcentratedStandard = isCowcentratedStandardVault(vault); // cowcentrated vault
   const isCowcentrated = isCowcentratedVault(vault); // naked clm
   const isGov = !isCowcentratedLikeVault(vault) && isGovVault(vault); // gov but not cowcentrated pool
+  const isFreeZap = isVaultFreeZap(vault);
 
   return (
     <Link
@@ -40,7 +42,8 @@ export const Vault = memo(function Vault({ vaultId }: VaultProps) {
         isCowcentratedPool && styles.vaultCowcentratedPool,
         isCowcentratedStandard && styles.vaultCowcentratedVault,
         isRetired && styles.vaultRetired,
-        isGov && styles.vaultEarnings
+        isGov && styles.vaultEarnings,
+        isFreeZap && styles.vaultFreeZap
       )}
     >
       <div className={classes.vaultInner}>

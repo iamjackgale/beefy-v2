@@ -77,7 +77,7 @@ const config = buildConfig(
           'not dead',
           'not op_mini all',
         ]
-      : ['last 1 chrome version', 'last 1 firefox version', 'last 1 safari version'],
+        : ['last 1 chrome version', 'last 1 firefox version', 'last 1 safari version'],
     // Where css variables are defined
     cssVarRoot: ':root',
     // Plugins
@@ -255,6 +255,11 @@ const config = buildConfig(
             value:
               'linear-gradient(348.15deg, rgba(255, 255, 255, 0) -166.22%, rgba(255, 255, 255, 0.7) 113.41%), linear-gradient(0deg, #FFD54F, #FFD54F)',
             description: 'tag.boost',
+          },
+          freeZap: {
+            value:
+              'linear-gradient(270deg, rgba(59, 152, 176, 0.204) 0%, rgba(39, 127, 154, 0.00) 100%)',
+            description: 'vault card tint for free zap vaults',
           },
         },
         colors: {
@@ -452,6 +457,9 @@ const config = buildConfig(
               '70': { value: '#4C2CDE' },
             },
           },
+          petrol: {
+            '20': { value: '#B7DDE1' },
+          },
         },
         sizes: {
           defaultAssetsImageSize: { value: '48px' },
@@ -519,6 +527,7 @@ const config = buildConfig(
             dark: { value: '{colors.white.70}' },
             black: { value: '{colors.darkBlue.90}' },
             boosted: { value: '{colors.gold.30}' },
+            freeZap: { value: '{colors.petrol.20}' },
             points: { value: '{colors.green.40}' },
             warning: { value: '{colors.orange.40}' },
             disabled: { value: '{colors.darkBlue.90-56a}' },
@@ -569,6 +578,10 @@ const config = buildConfig(
             retired: { background: { value: '{colors.tagRetiredBackground}' } },
             paused: { background: { value: '{colors.tagPausedBackground}' } },
             boost: { background: { value: '{gradients.boost}' } },
+            freeZap: {
+              background: { value: '{colors.petrol.20}' },
+              text: { value: '{colors.darkBlue.90}' },
+            },
             platform: {
               gov: { background: { value: '{colors.tagPlatformGovBackground}' } },
               clm: { background: { value: '{colors.tagPlatformClmBackground}' } },

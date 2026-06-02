@@ -10,6 +10,7 @@ import {
   isGovVault,
   isVaultActive,
   isVaultEarningPoints,
+  isVaultFreeZap,
   isVaultPaused,
   isVaultRetired,
   type VaultCowcentrated,
@@ -34,6 +35,7 @@ import { legacyMakeStyles } from '../../../../helpers/mui.ts';
 import { useIsOverflowingHorizontally } from '../../../../helpers/overflow.ts';
 import { useAppSelector } from '../../../../features/data/store/hooks.ts';
 import BoostIcon from '../../../../images/icons/boost.svg?react';
+import FreeZapIcon from '../../../../images/icons/freeZapBolt.svg?react';
 import LineaIgnitionIcon from '../../../../images/icons/linea-ignition.svg?react';
 import { useMediaQuery } from '../../../../hooks/useMediaQuery.ts';
 import { BasicTooltipContent } from '../../../Tooltip/BasicTooltipContent.tsx';
@@ -97,6 +99,18 @@ export const VaultPlatformTag = memo(function VaultPlatformTag({
   );
 });
 
+const VaultFreeZapTag = memo(function VaultFreeZapTag() {
+  const { t } = useTranslation();
+  return (
+    <VaultTag
+      css={styles.vaultTagFreeZap}
+      order="text-icon"
+      text={t('VaultTag-FreeZap')}
+      icon={<FreeZapIcon className={css(styles.vaultTagIconImage)} />}
+    />
+  );
+});
+
 const BaseVaultClmTag = memo(function BaseVaultClmTag({
   label,
   longLabel,
@@ -135,7 +149,7 @@ const BaseVaultClmTag = memo(function BaseVaultClmTag({
           src={getIcon('clm')}
           height={12}
           width={12}
-          className={classes.vaultTagClmIcon}
+          className={classes.vaultTagIconImage}
           alt={hideLabel ? label : undefined}
         />
       }
@@ -354,8 +368,9 @@ export const VaultTags = memo(function VaultTags({ vaultId, hidePlatform }: Vaul
 
   // Tag 1: Platform
   // Tag 2: CLM -> CLM Pool -> CLM Vault --> Vault --> Pool
-  // Tag 3: Retired -> Paused -> Promo -> none
-  // Tag 4: Points -> none
+  // Tag 3: Free Zap -> none
+  // Tag 4: Retired -> Paused -> Promo -> none
+  // Tag 5: Points -> none
   return (
     <VaultTagsContainer isVaultPage={hidePlatform}>
       {!hidePlatform && <VaultPlatformTag vaultId={vaultId} />}
@@ -364,6 +379,7 @@ export const VaultTags = memo(function VaultTags({ vaultId, hidePlatform }: Vaul
       : isGov ?
         <VaultTag css={styles.vaultTagPool} text={t('VaultTag-Pool')} />
       : <VaultTag css={styles.vaultTagVault} text={t('VaultTag-Vault')} />}
+      {isVaultFreeZap(vault) && <VaultFreeZapTag />}
       {isVaultRetired(vault) ?
         <VaultTag css={styles.vaultTagRetired} text={t('VaultTag-Retired')} />
       : isVaultPaused(vault) ?
