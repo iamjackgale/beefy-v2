@@ -927,6 +927,7 @@
   "ReplacementVault-Start": "Preview migration",
   "ReplacementVault-Loading": "Calculating route…",
   "ReplacementVault-Action": "Migrate Now",
+  "ReplacementVault-Confirm": "Confirm Migration",
   "ReplacementVault-Fee-Explainer": "The zap fee is waived for this migration.",
   "ReplacementVault-Error": "Could not build a migration route. Please try again.",
   "TokenBridge-native": "Native",

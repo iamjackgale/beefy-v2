@@ -3,6 +3,7 @@ import { getTransactApi } from '../apis/instances.ts';
 import {
   isVaultToVaultSingleTokenDepositOption,
   type InputTokenAmount,
+  type TransactQuote,
   type VaultToVaultSingleTokenDepositQuote,
 } from '../apis/transact/transact-types.ts';
 import { selectUserVaultBalanceInShareTokenIncludingDisplaced } from '../selectors/balance.ts';
@@ -71,10 +72,11 @@ export function fetchReplacementMigrationQuote(
 /**
  * "Migrate now" CTA: run approval(s) + the zap via the shared stepper.
  * Reuses {@link transactSteps}, which builds allowance steps from `quote.allowances`, re-quotes to
- * guard against price drift, and starts the stepper. It only reads slippage from transact state.
+ * guard against price drift (populating the global confirm state consumed by `ConfirmNotice`), and
+ * starts the stepper. It only reads slippage from transact state.
  */
 export function executeReplacementMigration(
-  quote: VaultToVaultSingleTokenDepositQuote,
+  quote: TransactQuote,
   t: TFunction<Namespace>
 ): BeefyThunk {
   return transactSteps(quote, t);

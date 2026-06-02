@@ -124,8 +124,4 @@ export const styles = {
     width: '16px',
     height: '16px',
   }),
-  errorText: css.raw({
-    textStyle: 'body.sm',
-    color: 'indicators.error',
-  }),
 };
