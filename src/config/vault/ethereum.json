@@ -6218,58 +6218,6 @@
     "network": "ethereum"
   },
   {
-    "id": "convex-usd3-rgusd",
-    "name": "USD3/rgUSD",
-    "type": "standard",
-    "token": "USD3rgUSD",
-    "tokenAddress": "0xde73E407EFC75EdBAfc5bcD62Ebb1E7A9b38EBCD",
-    "tokenDecimals": 18,
-    "tokenProviderId": "curve",
-    "earnContractAddress": "0x12eE065896cc5b24fa81fA4a10F935a445bf744f",
-    "earnedToken": "mooConvexUSD3-rgUSD",
-    "earnedTokenAddress": "0x12eE065896cc5b24fa81fA4a10F935a445bf744f",
-    "oracle": "lps",
-    "oracleId": "convex-usd3-rgusd",
-    "status": "eol",
-    "createdAt": 1718618127,
-    "retireReason": "rewards",
-    "retiredAt": 1721673133,
-    "platformId": "convex",
-    "assets": ["USD3", "rgUSD"],
-    "migrationIds": ["ethereum-convex", "ethereum-curve"],
-    "risks": {
-      "updatedAt": 1765557014,
-      "complex": false,
-      "curated": false,
-      "notAudited": false,
-      "notBattleTested": false,
-      "notCorrelated": false,
-      "notTimelocked": false,
-      "notVerified": false,
-      "synthAsset": false
-    },
-    "strategyTypeId": "multi-lp",
-    "addLiquidityUrl": "https://curve.finance/#/ethereum/pools/factory-twocrypto-27/deposit",
-    "removeLiquidityUrl": "https://curve.finance/#/ethereum/pools/factory-twocrypto-27/withdraw",
-    "network": "ethereum",
-    "zaps": [
-      {
-        "strategyId": "curve",
-        "poolAddress": "0xde73E407EFC75EdBAfc5bcD62Ebb1E7A9b38EBCD",
-        "methods": [
-          {
-            "type": "fixed-deposit-uint256",
-            "target": "0xde73E407EFC75EdBAfc5bcD62Ebb1E7A9b38EBCD",
-            "coins": [
-              "0x0d86883FAf4FfD7aEb116390af37746F45b6f378",
-              "0x78da5799CF427Fee11e9996982F4150eCe7a99A7"
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
     "id": "stargate-v2-eth-weth",
     "name": "WETH",
     "type": "standard",
