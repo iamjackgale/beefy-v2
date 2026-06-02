@@ -708,8 +708,10 @@
     "earnedTokenAddress": "0x5eF29a6d2dFA626ddA507BE605DEa43C6AEA34F9",
     "oracle": "lps",
     "oracleId": "etherex-usdc-usdt",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1754603201,
+    "retireReason": "tvl",
+    "retiredAt": 1780413682,
     "platformId": "etherex",
     "assets": ["USDC", "USDT"],
     "risks": {
