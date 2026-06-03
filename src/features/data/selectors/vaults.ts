@@ -13,6 +13,7 @@ import {
   isErc4626Vault,
   isGovVault,
   isStandardVault,
+  isVaultMigratable,
   isVaultPaused,
   isVaultPausedOrRetired,
   isVaultRetired,
@@ -185,6 +186,21 @@ export const selectVaultReplacementMigration = (
   }
 
   return undefined;
+};
+
+/**
+ * Whether to show the "Migrate" tag/gradient for a vault. True when the vault is migratable on its
+ * own ({@link isVaultMigratable} — legacy LP migrators), OR it is the OLD wrapper of a
+ * replacement-vault migration. `replacementVaultId` lives on the hidden naked CLM, so this resolves
+ * the user-facing wrapper via {@link selectVaultReplacementMigration} and tags it when it is the
+ * source (old) side of the migration.
+ */
+export const selectIsVaultMigratable = (state: BeefyState, vaultId: VaultEntity['id']): boolean => {
+  const vault = selectVaultByIdOrUndefined(state, vaultId);
+  if (!vault) return false;
+  if (isVaultMigratable(vault)) return true;
+  const migration = selectVaultReplacementMigration(state, vaultId);
+  return !!migration && migration.oldVaultId === vaultId;
 };
 
 export const selectIsVaultPausedOrRetired = createCachedSelector(

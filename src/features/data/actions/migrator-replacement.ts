@@ -1,4 +1,5 @@
 import type { Namespace, TFunction } from 'react-i18next';
+import { groupBy, uniqBy } from 'lodash-es';
 import { getTransactApi } from '../apis/instances.ts';
 import {
   isVaultToVaultSingleTokenDepositOption,
@@ -6,13 +7,15 @@ import {
   type TransactQuote,
   type VaultToVaultSingleTokenDepositQuote,
 } from '../apis/transact/transact-types.ts';
+import type { VaultEntity } from '../entities/vault.ts';
+import { isTokenErc20 } from '../entities/token.ts';
 import { selectUserVaultBalanceInShareTokenIncludingDisplaced } from '../selectors/balance.ts';
 import { selectTokenByAddress } from '../selectors/tokens.ts';
 import { selectVaultById } from '../selectors/vaults.ts';
 import { selectWalletAddress } from '../selectors/wallet.ts';
-import type { BeefyStateFn, BeefyThunk } from '../store/types.ts';
+import type { BeefyDispatchFn, BeefyStateFn, BeefyThunk } from '../store/types.ts';
+import { fetchAllowanceAction } from './allowance.ts';
 import { transactSteps } from './wallet/transact.ts';
-import type { VaultEntity } from '../entities/vault.ts';
 
 /**
  * Standalone same-chain vault-to-vault (v2v) migration, fully decoupled from the transact form.
@@ -26,6 +29,7 @@ import type { VaultEntity } from '../entities/vault.ts';
 async function buildReplacementQuote(
   oldVaultId: VaultEntity['id'],
   newVaultId: VaultEntity['id'],
+  dispatch: BeefyDispatchFn,
   getState: BeefyStateFn
 ): Promise<VaultToVaultSingleTokenDepositQuote> {
   const state = getState();
@@ -58,15 +62,38 @@ async function buildReplacementQuote(
   if (!quote) {
     throw new Error('Failed to build migration quote');
   }
+
+  // Fetch the quote's allowances into state so the approval-step check (in getTransactSteps) sees
+  // the real on-chain allowance and skips approval when already approved. Without this the standalone
+  // flow never populates the share-token->zap allowance, so it always asks to approve.
+  const erc20Allowances = quote.allowances.filter(a => isTokenErc20(a.token));
+  const byChainSpender = groupBy(
+    uniqBy(erc20Allowances, a => `${a.token.chainId}-${a.spenderAddress}-${a.token.address}`),
+    a => `${a.token.chainId}-${a.spenderAddress}`
+  );
+  await Promise.all(
+    Object.values(byChainSpender).map(allowances =>
+      dispatch(
+        fetchAllowanceAction({
+          chainId: allowances[0].token.chainId,
+          spenderAddress: allowances[0].spenderAddress,
+          tokens: allowances.flatMap(a => (isTokenErc20(a.token) ? [a.token] : [])),
+          walletAddress,
+        })
+      )
+    )
+  );
+
   return quote as VaultToVaultSingleTokenDepositQuote;
 }
 
-/** "Start migration" CTA: fetch + return the v2v deposit quote (no state mutation). */
+/** "Start migration" CTA: fetch the v2v deposit quote and prime its allowances in state. */
 export function fetchReplacementMigrationQuote(
   oldVaultId: VaultEntity['id'],
   newVaultId: VaultEntity['id']
 ): BeefyThunk<Promise<VaultToVaultSingleTokenDepositQuote>> {
-  return async (_dispatch, getState) => buildReplacementQuote(oldVaultId, newVaultId, getState);
+  return async (dispatch, getState) =>
+    buildReplacementQuote(oldVaultId, newVaultId, dispatch, getState);
 }
 
 /**

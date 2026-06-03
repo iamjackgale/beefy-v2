@@ -364,6 +364,14 @@ export function isVaultEarningPoints(vault: VaultEntity) {
   return vault.earningPoints === true;
 }
 
+/**
+ * Whether a vault has an available migration (shows the "Migrate" tag + card gradient tint).
+ * Single source of truth for both {@link VaultTags} and the vault card.
+ */
+export function isVaultMigratable(vault: VaultEntity) {
+  return !!vault.replacementVaultId;
+}
+
 export function isVaultPausedOrRetired(vault: VaultEntity) {
   return vault.status === 'paused' || vault.status === 'eol';
 }

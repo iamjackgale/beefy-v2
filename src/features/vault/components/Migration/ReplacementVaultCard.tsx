@@ -52,6 +52,7 @@ import { selectWalletAddressIfKnown } from '../../../data/selectors/wallet.ts';
 import { useAppDispatch, useAppSelector } from '../../../data/store/hooks.ts';
 import { ActionConnectSwitch } from '../Actions/Transact/CommonActions/CommonActions.tsx';
 import { ConfirmNotice } from '../Actions/Transact/ConfirmNotice/ConfirmNotice.tsx';
+import { PriceImpactNotice } from '../Actions/Transact/PriceImpactNotice/PriceImpactNotice.tsx';
 import { ZapRoute, ZapRoutePlaceholder } from '../Actions/Transact/ZapRoute/ZapRoute.tsx';
 import { ZapSlippage } from '../Actions/Transact/ZapSlippage/ZapSlippage.tsx';
 import { IconWithTooltip } from '../../../../components/Tooltip/IconWithTooltip.tsx';
@@ -87,7 +88,7 @@ export const ReplacementVaultCard = memo(function ReplacementVaultCard({
   }
 
   return (
-    <Migrate
+    <MigrateGate
       walletAddress={walletAddress}
       oldVaultId={migration.oldVaultId}
       newVaultId={migration.newVaultId}
@@ -101,19 +102,55 @@ type MigrateProps = {
   newVaultId: VaultEntity['id'];
 };
 
-const Migrate = memo(function Migrate({ walletAddress, oldVaultId, newVaultId }: MigrateProps) {
-  const classes = useStyles();
-  const { t } = useTranslation();
-  const dispatch = useAppDispatch();
-
-  const newVault = useAppSelector(state => selectVaultById(state, newVaultId));
-  // share-token balance + USD value gate whether the user actually has a meaningful position
+/**
+ * Gates visibility independently from the live balance poll:
+ * - Latch on first show: once the user is seen to have a balance in the old vault, keep the card
+ *   mounted for the rest of the session so the periodic (~3min) balance refetch can't make it flicker
+ *   or disappear mid-flow.
+ * - Session dismiss: pressing Close after a successful migration hides it for the session (a reload
+ *   re-evaluates from the now-zero balance, so it stays gone naturally — no localStorage needed).
+ */
+const MigrateGate = memo(function MigrateGate({
+  walletAddress,
+  oldVaultId,
+  newVaultId,
+}: MigrateProps) {
   const shareBalance = useAppSelector(state =>
     selectUserVaultBalanceInShareTokenIncludingDisplaced(state, oldVaultId, walletAddress)
   );
   const balanceUsd = useAppSelector(state =>
     selectUserVaultBalanceInUsdIncludingDisplaced(state, oldVaultId, walletAddress)
   );
+  const hasBalance = balanceUsd.gte(BIG_ONE) && shareBalance.gt(0);
+
+  const [dismissed, setDismissed] = useState(false);
+  // latch: stays true once the user has ever been seen with a balance this session
+  const everHadBalanceRef = useRef(false);
+  if (hasBalance) {
+    everHadBalanceRef.current = true;
+  }
+
+  const handleDismiss = useCallback(() => setDismissed(true), []);
+
+  if (dismissed || !everHadBalanceRef.current) {
+    return null;
+  }
+
+  return <Migrate oldVaultId={oldVaultId} newVaultId={newVaultId} onDismiss={handleDismiss} />;
+});
+
+type MigrateInnerProps = {
+  oldVaultId: VaultEntity['id'];
+  newVaultId: VaultEntity['id'];
+  onDismiss: () => void;
+};
+
+const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: MigrateInnerProps) {
+  const classes = useStyles();
+  const { t } = useTranslation();
+  const dispatch = useAppDispatch();
+
+  const newVault = useAppSelector(state => selectVaultById(state, newVaultId));
   const isStepping = useAppSelector(selectIsStepperStepping);
   const isExecuting = useAppSelector(selectTransactExecuting);
   const stepperContent = useAppSelector(selectStepperStepContent);
@@ -128,6 +165,7 @@ const Migrate = memo(function Migrate({ walletAddress, oldVaultId, newVaultId }:
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<SerializedError | undefined>(undefined);
   const [isDisabledByConfirm, setIsDisabledByConfirm] = useState(false);
+  const [isDisabledByPriceImpact, setIsDisabledByPriceImpact] = useState(false);
   // whether a quote has ever been requested (so slippage changes re-fetch, but only after preview)
   const requestedRef = useRef(false);
 
@@ -170,7 +208,9 @@ const Migrate = memo(function Migrate({ walletAddress, oldVaultId, newVaultId }:
     dispatch(stepperReset());
     setQuote(undefined);
     requestedRef.current = false;
-  }, [dispatch]);
+    // hide the card for this session (the migration is done); a reload re-evaluates from balance
+    onDismiss();
+  }, [dispatch, onDismiss]);
 
   // disable while the confirm flow is pending/rejected, but keep enabled when changes need confirming
   const effectiveDisabledByConfirm = isDisabledByConfirm && !confirmNeededWithChanges;
@@ -183,12 +223,6 @@ const Migrate = memo(function Migrate({ walletAddress, oldVaultId, newVaultId }:
     (isStepping &&
       (stepperContent === StepContent.StartTx || stepperContent === StepContent.WalletTx));
   const isLoading = isExecuting || isStepping;
-
-  // cheap sync gate: must have meaningful balance in the old vault (same-chain + routing-token
-  // viability is enforced by the v2v option fetch in the "Start migration" step)
-  if (balanceUsd.lt(BIG_ONE) || !shareBalance.gt(0)) {
-    return null;
-  }
 
   return (
     <CowAnimationProvider>
@@ -218,6 +252,7 @@ const Migrate = memo(function Migrate({ walletAddress, oldVaultId, newVaultId }:
               {error ?
                 <QuoteError error={error} />
               : null}
+              <PriceImpactNotice quote={quote} onChange={setIsDisabledByPriceImpact} />
               <ConfirmNotice onChange={setIsDisabledByConfirm} />
               <ActionsContainer>
                 <ActionConnectSwitch chainId={newVault.chainId}>
@@ -230,7 +265,11 @@ const Migrate = memo(function Migrate({ walletAddress, oldVaultId, newVaultId }:
                     isConfirmed={isComplete}
                     disabled={
                       !isComplete &&
-                      (isStepping || isExecuting || loading || effectiveDisabledByConfirm)
+                      (isStepping ||
+                        isExecuting ||
+                        loading ||
+                        isDisabledByPriceImpact ||
+                        effectiveDisabledByConfirm)
                     }
                     onClick={isComplete ? handleClose : handleMigrate}
                   >

@@ -25,6 +25,11 @@ export const styles = {
   vaultRetired: css.raw({
     backgroundColor: 'background.vaults.inactive',
   }),
+  vaultMigrate: css.raw({
+    // layered over the vault's base backgroundColor; mirrors the figma "gradient tint" overlay
+    backgroundImage: '{gradients.migrate}',
+    backgroundRepeat: 'no-repeat',
+  }),
   vaultInner: css.raw({
     display: 'grid',
     gridTemplateColumns: '1fr',
