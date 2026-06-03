@@ -258,7 +258,7 @@ const config = buildConfig(
           },
           freeZap: {
             value:
-              'linear-gradient(270deg, rgba(59, 152, 176, 0.204) 0%, rgba(39, 127, 154, 0.00) 100%)',
+              'linear-gradient(270deg, rgba(59, 152, 176, 0.204) 0%, rgba(39, 127, 154, 0.00) 25%)',
             description: 'vault card tint for free zap vaults',
           },
         },
