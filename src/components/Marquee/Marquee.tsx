@@ -9,12 +9,6 @@ export type MarqueeProps = {
   children: ReactNode;
   /** scroll speed in px/second — longer content takes proportionally longer @default 40 */
   speed?: number;
-  /**
-   * When `false` (default) the loop plays continuously whenever the content overflows.
-   * When `true` the loop is paused unless an ancestor sets `--marquee-play: running`
-   * (e.g. on hover, or always on touch devices) — use it to gate the animation.
-   */
-  gated?: boolean;
   /** applied to the scrolling content element — use it to style `children` */
   className?: string;
 };
@@ -47,7 +41,6 @@ function useMarqueeOverflow() {
 export const Marquee = memo(function Marquee({
   children,
   speed = DEFAULT_SPEED_PX_PER_S,
-  gated = false,
   className,
 }: MarqueeProps) {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -71,7 +64,7 @@ export const Marquee = memo(function Marquee({
 
   return (
     <Viewport ref={viewportRef} overflowing={isOverflowing} style={style}>
-      <Track ref={trackRef} overflowing={isOverflowing} gated={gated}>
+      <Track ref={trackRef} overflowing={isOverflowing}>
         <Content ref={innerRef} overflowing={isOverflowing} className={className}>
           {children}
         </Content>
@@ -133,13 +126,6 @@ const Track = styled('div', {
     overflowing: {
       true: {
         animation: 'featuredVaultMarqueeLoop var(--marquee-duration, 10s) linear infinite',
-      },
-    },
-    // When gated, the loop only advances while an ancestor sets `--marquee-play`
-    // to `running` (defaults to paused).
-    gated: {
-      true: {
-        animationPlayState: 'var(--marquee-play, paused)',
       },
     },
   },
