@@ -3601,8 +3601,10 @@
     "earnedTokenAddress": "0x8F075d5E15Ee79E2b35b506b41382c9AcD6dDE81",
     "oracle": "lps",
     "oracleId": "velo-cow-op-weth-op",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1722192821,
+    "retireReason": "rewards",
+    "retiredAt": 1780520209,
     "platformId": "velodrome",
     "assets": ["OP", "WETH"],
     "risks": {
@@ -4421,8 +4423,10 @@
     "earnedOracleIds": ["VELOV2", "OP"],
     "oracle": "lps",
     "oracleId": "velo-cow-op-weth-op",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1719965838,
+    "retireReason": "rewards",
+    "retiredAt": 1780520209,
     "platformId": "velodrome",
     "assets": ["OP", "WETH"],
     "risks": {
