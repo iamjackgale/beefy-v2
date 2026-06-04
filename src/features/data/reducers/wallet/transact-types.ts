@@ -1,4 +1,5 @@
 import type {
+  OptionFeeCampaign,
   QuoteOutputTokenAmountChange,
   RecoveryQuote,
   TokenAmount,
@@ -46,6 +47,7 @@ export type TransactSelection = {
   tokens: TokenEntity[];
   order: number;
   hideIfZeroBalance: boolean;
+  feeCampaign?: OptionFeeCampaign;
 };
 
 export type TransactSelections = {

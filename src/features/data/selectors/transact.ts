@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import BigNumber from 'bignumber.js';
-import { orderBy } from 'lodash-es';
+import { isEqual, orderBy } from 'lodash-es';
 import { BIG_ONE, BIG_ZERO, compareBigNumber } from '../../../helpers/big-number.ts';
 import { extractTagFromLpSymbol } from '../../../helpers/tokens.ts';
 import type { PulseHighlightProps } from '../../vault/components/PulseHighlight/PulseHighlight.tsx';
@@ -11,10 +11,14 @@ import {
   isCrossChainOption,
   isVaultDestWithdrawOption,
   isVaultSourceDepositOption,
+  isZapOption,
+  isZapQuote,
   type TokenAmount,
   type TransactOption,
   type TransactQuote,
+  type ZapFee,
 } from '../apis/transact/transact-types.ts';
+import { computeOptionZapFee } from '../apis/transact/helpers/fee.ts';
 import type { ChainEntity } from '../entities/chain.ts';
 import { isSingleGovVault, type VaultEntity } from '../entities/vault.ts';
 import {
@@ -452,6 +456,32 @@ export const selectTransactOptionsForSelectionId = createSelector(
     selectTransactOptionIdsForSelectionId(state, selectionId),
   (state: BeefyState) => state.ui.transact.options.byOptionId,
   (optionIds, byOptionId) => optionIds.map(id => byOptionId[id])
+);
+
+export const selectTransactSelectedZapFee = createSelector(
+  (state: BeefyState) => state,
+  (state): { option: TransactOption; fee: ZapFee } | undefined => {
+    const selectionId = state.ui.transact.selectedSelectionId;
+    if (!selectionId) {
+      return undefined;
+    }
+
+    const quote = selectTransactSelectedQuoteOrUndefined(state);
+    if (quote && isZapQuote(quote) && quote.option.selectionId === selectionId) {
+      return { option: quote.option, fee: quote.fee };
+    }
+
+    const optionIds = state.ui.transact.options.bySelectionId[selectionId];
+    if (!optionIds) {
+      return undefined;
+    }
+    const option = optionIds.map(id => state.ui.transact.options.byOptionId[id]).find(isZapOption);
+    if (!option) {
+      return undefined;
+    }
+    return { option, fee: computeOptionZapFee(state, option) };
+  },
+  { memoizeOptions: { resultEqualityCheck: isEqual } }
 );
 
 export function selectTokenAmountsTotalValue(

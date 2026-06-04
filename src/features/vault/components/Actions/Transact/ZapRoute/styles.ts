@@ -117,4 +117,8 @@ export const styles = {
   placeholderIcon: css.raw({
     display: 'block',
   }),
+  feeOriginal: css.raw({
+    color: 'text.dark',
+    textDecoration: 'line-through',
+  }),
 };

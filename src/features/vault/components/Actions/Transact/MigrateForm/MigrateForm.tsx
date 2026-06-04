@@ -5,10 +5,7 @@ import { Button } from '../../../../../../components/Button/Button.tsx';
 import { AnimatedButton } from '../../../../../../components/Button/AnimatedButton.tsx';
 import { AlertError } from '../../../../../../components/Alerts/Alerts.tsx';
 import { ExternalLink } from '../../../../../../components/Links/ExternalLink.tsx';
-import { IconWithTooltip } from '../../../../../../components/Tooltip/IconWithTooltip.tsx';
-import { BasicTooltipContent } from '../../../../../../components/Tooltip/BasicTooltipContent.tsx';
-import InfoIcon from '../../../../../../images/icons/info-rounded-square.svg?react';
-import { formatPercent } from '../../../../../../helpers/format.ts';
+
 import { legacyMakeStyles } from '../../../../../../helpers/mui.ts';
 import { useAppDispatch, useAppSelector } from '../../../../../data/store/hooks.ts';
 import {
@@ -27,11 +24,7 @@ import {
   TransactStatus,
 } from '../../../../../data/reducers/wallet/transact-types.ts';
 import { isCowcentratedGovVault, type VaultEntity } from '../../../../../data/entities/vault.ts';
-import {
-  isZapFeeDiscounted,
-  isZapQuote,
-  type ZapFee,
-} from '../../../../../data/apis/transact/transact-types.ts';
+import { isZapQuote } from '../../../../../data/apis/transact/transact-types.ts';
 import {
   QuoteCowcentratedNoSingleSideError,
   QuoteCowcentratedNotCalmError,
@@ -65,6 +58,7 @@ import { PriceImpactNotice } from '../PriceImpactNotice/PriceImpactNotice.tsx';
 import { ZapRoute, ZapRoutePlaceholder } from '../ZapRoute/ZapRoute.tsx';
 import { ZapSlippage } from '../ZapSlippage/ZapSlippage.tsx';
 import { styles } from './styles.ts';
+import { VaultFees } from '../VaultFees/VaultFees.tsx';
 
 const useStyles = legacyMakeStyles(styles);
 
@@ -224,7 +218,7 @@ const MigrateForm = memo(function MigrateForm({ oldVaultId, newVaultId }: Migrat
                 : t('ReplacementVault-Action')}
               </AnimatedButton>
             </ActionConnectSwitch>
-            <ZapFee fee={quote.fee.value} original={getOriginalFee(quote.fee)} />
+            <VaultFees />
           </div>
         </>
       : <>
@@ -245,7 +239,7 @@ const MigrateForm = memo(function MigrateForm({ oldVaultId, newVaultId }: Migrat
                 {isQuotePending ? t('ReplacementVault-Loading') : t('ReplacementVault-Start')}
               </Button>
             </ActionConnectSwitch>
-            <ZapFee fee={0} original={0.0005} />
+            <VaultFees />
           </div>
         </>
       }
@@ -273,10 +267,6 @@ const NewVaultCardSlot = memo(function NewVaultCardSlot({
     </div>
   );
 });
-
-function getOriginalFee(fee: ZapFee): number | undefined {
-  return isZapFeeDiscounted(fee) ? fee.original : undefined;
-}
 
 /**
  * Boost-staked shares can't be pulled by the zap, so only the directly-held portion migrates. When
@@ -337,44 +327,6 @@ const QuoteError = memo(function QuoteError({
         <p>{error.message}</p>
       : null}
     </AlertError>
-  );
-});
-
-const ZapFee = memo(function ZapFee({
-  fee,
-  original,
-}: {
-  fee: number;
-  original: number | undefined;
-}) {
-  const classes = useStyles();
-  const { t } = useTranslation();
-  return (
-    <div className={classes.feeContainer}>
-      <span className={classes.feeLabel}>
-        {t('Transact-Fee-Zap')}
-        <IconWithTooltip
-          Icon={InfoIcon}
-          iconSize={16}
-          iconCss={styles.feeInfoIcon}
-          tooltip={
-            <BasicTooltipContent
-              title={t('Transact-Fee-Zap')}
-              content={t('ReplacementVault-Fee-Explainer')}
-            />
-          }
-        />
-      </span>
-      <span className={classes.feeValue}>
-        {original !== undefined && original !== fee ?
-          <>
-            <span className={classes.feeOriginal}>{formatPercent(original, 2)}</span>
-            <span aria-hidden={true}>→</span>
-          </>
-        : null}
-        {formatPercent(fee, 2)}
-      </span>
-    </div>
   );
 });
 
