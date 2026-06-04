@@ -801,6 +801,10 @@ const config = buildConfig(
             transform: 'rotate(360deg)',
           },
         },
+        featuredVaultMarqueeLoop: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
         addressInputCaretBlink: {
           '0%, 50%': { backgroundSize: '2px 12px' },
           '50.01%, 100%': { backgroundSize: '0 12px' },
