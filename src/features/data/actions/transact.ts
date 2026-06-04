@@ -49,8 +49,14 @@ export type TransactInitArgs = {
   vaultId: VaultEntity['id'];
 };
 
+export type TransactInitReadyArgs = {
+  vaultId: VaultEntity['id'];
+  /** Initial tab to select once data is ready (e.g. Migrate when the vault is migratable). */
+  mode: TransactMode;
+};
+
 export const transactInit = createAction<TransactInitArgs>('transact/init');
-export const transactInitReady = createAction<TransactInitArgs>('transact/init/ready');
+export const transactInitReady = createAction<TransactInitReadyArgs>('transact/init/ready');
 export const transactSwitchMode = createAction<TransactMode>('transact/switchMode');
 export const transactSwitchStep = createAction<TransactStep>('transact/switchStep');
 export const transactSelectSelection = createAction<{
@@ -117,8 +123,14 @@ export const transactFetchOptions = createAppAsyncThunk<
 >(
   'transact/fetchOptions',
   async ({ vaultId, mode }, { getState, dispatch }) => {
-    if (mode === TransactMode.Claim || mode === TransactMode.Boost) {
-      throw new Error(`Claim or Boost mode not supported.`);
+    if (
+      mode === TransactMode.Claim ||
+      mode === TransactMode.Boost ||
+      mode === TransactMode.Migrate
+    ) {
+      // Migrate has no option-fetching method (its quote is built directly via
+      // transactFetchMigrationQuote); the thunk's `condition` also blocks these modes.
+      throw new Error(`Claim, Boost or Migrate mode not supported.`);
     }
 
     const api = await getTransactApi();
@@ -239,10 +251,7 @@ export const transactFetchQuotes = createAppAsyncThunk<
     } else {
       let inputToken: TokenEntity;
       const opt = options[0];
-      if (
-        opt?.strategyId === 'cross-chain' ||
-        opt?.strategyId === 'vault-to-vault-single-token'
-      ) {
+      if (opt?.strategyId === 'cross-chain' || opt?.strategyId === 'vault-to-vault-single-token') {
         // Withdraw from page vault via a vault-source strategy: option declares its shareToken as input.
         inputToken = opt.inputs[0];
       } else if (isCowcentratedVault(vault)) {

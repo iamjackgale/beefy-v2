@@ -7,13 +7,16 @@ import {
   type TransactQuote,
   type VaultToVaultSingleTokenDepositQuote,
 } from '../apis/transact/transact-types.ts';
+import type { SerializedError } from '../apis/transact/strategies/error-types.ts';
+import { isSerializableError } from '../apis/transact/strategies/error.ts';
 import type { VaultEntity } from '../entities/vault.ts';
 import { isTokenErc20 } from '../entities/token.ts';
 import { selectUserVaultBalanceInShareToken } from '../selectors/balance.ts';
 import { selectTokenByAddress } from '../selectors/tokens.ts';
 import { selectVaultById } from '../selectors/vaults.ts';
 import { selectWalletAddress } from '../selectors/wallet.ts';
-import type { BeefyDispatchFn, BeefyStateFn, BeefyThunk } from '../store/types.ts';
+import type { BeefyDispatchFn, BeefyState, BeefyStateFn, BeefyThunk } from '../store/types.ts';
+import { createAppAsyncThunk } from '../utils/store-utils.ts';
 import { fetchAllowanceAction } from './allowance.ts';
 import { transactSteps } from './wallet/transact.ts';
 
@@ -87,14 +90,36 @@ async function buildReplacementQuote(
   return quote as VaultToVaultSingleTokenDepositQuote;
 }
 
-/** "Start migration" CTA: fetch the v2v deposit quote and prime its allowances in state. */
-export function fetchReplacementMigrationQuote(
-  oldVaultId: VaultEntity['id'],
-  newVaultId: VaultEntity['id']
-): BeefyThunk<Promise<VaultToVaultSingleTokenDepositQuote>> {
-  return async (dispatch, getState) =>
-    buildReplacementQuote(oldVaultId, newVaultId, dispatch, getState);
-}
+export type TransactFetchMigrationQuoteArgs = {
+  oldVaultId: VaultEntity['id'];
+  newVaultId: VaultEntity['id'];
+};
+
+/**
+ * Build the v2v migration quote and store it in the SHARED transact quotes slice (the reducer
+ * cases for this thunk live in `reducers/wallet/transact.ts`, mirroring `transactFetchQuotes`).
+ * The Migrate tab has no input field, so it drives this directly (on mount + on slippage change)
+ * instead of going through the input-driven `transactFetchQuotes` path; the quote is then read via
+ * the standard `selectTransactSelectedQuote*` selectors — no longer isolated in local state.
+ */
+export const transactFetchMigrationQuote = createAppAsyncThunk<
+  { quotes: TransactQuote[] },
+  TransactFetchMigrationQuoteArgs,
+  { state: BeefyState; rejectValue: SerializedError }
+>(
+  'transact/fetchMigrationQuote',
+  async ({ oldVaultId, newVaultId }, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const quote = await buildReplacementQuote(oldVaultId, newVaultId, dispatch, getState);
+      return { quotes: [quote] };
+    } catch (e: unknown) {
+      if (isSerializableError(e)) {
+        return rejectWithValue(e.serialize());
+      }
+      throw e;
+    }
+  }
+);
 
 /**
  * "Migrate now" CTA: run approval(s) + the zap via the shared stepper.

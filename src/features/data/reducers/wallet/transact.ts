@@ -32,6 +32,7 @@ import {
   crossChainOpInitiated,
   crossChainOpStatusUpdate,
 } from '../../actions/wallet/cross-chain.ts';
+import { transactFetchMigrationQuote } from '../../actions/migrator-replacement.ts';
 import {
   isCrossChainDepositOption,
   isCrossChainWithdrawOption,
@@ -237,7 +238,8 @@ const transactSlice = createSlice({
           sliceState.vaultId = action.payload.vaultId;
           sliceState.pendingVaultId = undefined;
           sliceState.step = TransactStep.Form;
-          sliceState.mode = TransactMode.Deposit;
+          // default tab is computed once data has loaded (Migrate when migratable, else Deposit)
+          sliceState.mode = action.payload.mode;
         }
       })
       .addCase(transactFetchOptions.pending, (sliceState, action) => {
@@ -284,6 +286,34 @@ const transactSlice = createSlice({
         }
       })
       .addCase(transactFetchQuotes.fulfilled, (sliceState, action) => {
+        if (sliceState.quotes.requestId === action.meta.requestId) {
+          sliceState.quotes.status = TransactStatus.Fulfilled;
+
+          addQuotesToState(sliceState, action.payload.quotes);
+
+          if (sliceState.selectedQuoteId === undefined) {
+            const firstQuote = first(action.payload.quotes);
+            if (firstQuote) {
+              sliceState.selectedQuoteId = firstQuote.id;
+            }
+          }
+        }
+      })
+      // Migrate tab: externally-built v2v quote stored in the shared quotes slice (mirrors the
+      // transactFetchQuotes cases above so the standard quote selectors/components work for migrate).
+      .addCase(transactFetchMigrationQuote.pending, (sliceState, action) => {
+        resetQuotes(sliceState);
+        sliceState.quotes.status = TransactStatus.Pending;
+        sliceState.quotes.requestId = action.meta.requestId;
+      })
+      .addCase(transactFetchMigrationQuote.rejected, (sliceState, action) => {
+        if (sliceState.quotes.requestId === action.meta.requestId) {
+          sliceState.quotes.status = TransactStatus.Rejected;
+          sliceState.quotes.error = action.meta.rejectedWithValue ? action.payload : action.error;
+          console.error(sliceState.quotes.error);
+        }
+      })
+      .addCase(transactFetchMigrationQuote.fulfilled, (sliceState, action) => {
         if (sliceState.quotes.requestId === action.meta.requestId) {
           sliceState.quotes.status = TransactStatus.Fulfilled;
 

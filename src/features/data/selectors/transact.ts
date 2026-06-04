@@ -50,7 +50,7 @@ import {
   selectConnectedUserHasMerklRewardsForVault,
   selectConnectedUserHasStellaSwapRewardsForVault,
 } from './user-rewards.ts';
-import { selectVaultById } from './vaults.ts';
+import { selectVaultById, selectVaultReplacementMigration } from './vaults.ts';
 import { convertVaultShareToDepositTokenAmount } from '../apis/transact/helpers/quotes.ts';
 import { selectWalletAddressIfKnown } from './wallet.ts';
 import { selectChainById } from './chains.ts';
@@ -169,9 +169,7 @@ export const selectTransactSelected = createSelector(
 );
 
 /** True when the active selection's withdraw is sourced from the page vault (option declares its shareToken as input). */
-export const selectTransactIsActiveSelectionVaultSourceWithdraw = (
-  state: BeefyState
-): boolean => {
+export const selectTransactIsActiveSelectionVaultSourceWithdraw = (state: BeefyState): boolean => {
   const selectionId = state.ui.transact.selectedSelectionId;
   if (!selectionId) return false;
   const options = selectTransactOptionsForSelectionId(state, selectionId);
@@ -518,11 +516,7 @@ export function selectTransactCrossChainPreflight(state: BeefyState): boolean {
     option.srcHandlerKind === 'vault' ?
       selectTokenAmountValue(
         state,
-        convertVaultShareToDepositTokenAmount(
-          state,
-          option.srcVaultId,
-          inputAmounts[0] || BIG_ZERO
-        )
+        convertVaultShareToDepositTokenAmount(state, option.srcVaultId, inputAmounts[0] || BIG_ZERO)
       )
     : BigNumber.sum(
         ...option.inputs.map((token, i) =>
@@ -784,3 +778,29 @@ export const selectCrossChainRecoveryQuoteIsStale = (state: BeefyState) =>
   state.ui.transact.crossChain.recoveryQuote.isStale;
 
 export const selectTransactSuccessClosed = (state: BeefyState) => state.ui.transact.successClosed;
+
+/**
+ * Whether to show (and default to) the Migrate tab: the page vault has a v2v replacement AND the
+ * connected user holds a migratable balance in it. Mirrors the gating the standalone card used.
+ */
+export const selectTransactShouldShowMigrate = (
+  state: BeefyState,
+  vaultId: VaultEntity['id'] | undefined
+): boolean => {
+  if (!vaultId) {
+    return false;
+  }
+  const migration = selectVaultReplacementMigration(state, vaultId);
+  if (!migration) {
+    return false;
+  }
+  const walletAddress = selectWalletAddressIfKnown(state);
+  if (!walletAddress) {
+    return false;
+  }
+  return selectUserVaultBalanceInShareTokenIncludingDisplaced(
+    state,
+    migration.oldVaultId,
+    walletAddress
+  ).gt(0);
+};
