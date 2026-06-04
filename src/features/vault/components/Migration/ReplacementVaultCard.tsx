@@ -7,10 +7,10 @@ import {
 } from '../../../../components/Button/AnimatedButton.tsx';
 import { AlertError } from '../../../../components/Alerts/Alerts.tsx';
 import { ExternalLink } from '../../../../components/Links/ExternalLink.tsx';
+import { InternalLink } from '../../../../components/Banners/Links/InternalLink.tsx';
 import { formatPercent } from '../../../../helpers/format.ts';
 import { legacyMakeStyles } from '../../../../helpers/mui.ts';
 import { getPlatformSrc } from '../../../../helpers/platformsSrc.ts';
-import { BIG_ONE } from '../../../../helpers/big-number.ts';
 import {
   executeReplacementMigration,
   fetchReplacementMigrationQuote,
@@ -18,7 +18,7 @@ import {
 import { transactClearInput, transactSetSuccessClosed } from '../../../data/actions/transact.ts';
 import { stepperReset } from '../../../data/actions/wallet/stepper.ts';
 import { StepContent } from '../../../data/reducers/wallet/stepper-types.ts';
-import type { VaultEntity } from '../../../data/entities/vault.ts';
+import { isCowcentratedGovVault, type VaultEntity } from '../../../data/entities/vault.ts';
 import {
   isZapFeeDiscounted,
   type VaultToVaultSingleTokenDepositQuote,
@@ -30,8 +30,9 @@ import {
 import { serializeError } from '../../../data/apis/transact/strategies/error.ts';
 import type { SerializedError } from '../../../data/apis/transact/strategies/error-types.ts';
 import {
+  selectUserVaultBalanceInDepositTokenInBoosts,
+  selectUserVaultBalanceInShareToken,
   selectUserVaultBalanceInShareTokenIncludingDisplaced,
-  selectUserVaultBalanceInUsdIncludingDisplaced,
 } from '../../../data/selectors/balance.ts';
 import {
   selectIsStepperStepping,
@@ -51,6 +52,7 @@ import {
 import { selectWalletAddressIfKnown } from '../../../data/selectors/wallet.ts';
 import { useAppDispatch, useAppSelector } from '../../../data/store/hooks.ts';
 import { ActionConnectSwitch } from '../Actions/Transact/CommonActions/CommonActions.tsx';
+import WithdrawBoostNotice from '../Actions/Transact/FormStepFooter/WithdrawBoostNotice.tsx';
 import { ConfirmNotice } from '../Actions/Transact/ConfirmNotice/ConfirmNotice.tsx';
 import { PriceImpactNotice } from '../Actions/Transact/PriceImpactNotice/PriceImpactNotice.tsx';
 import { ZapRoute, ZapRoutePlaceholder } from '../Actions/Transact/ZapRoute/ZapRoute.tsx';
@@ -118,10 +120,7 @@ const MigrateGate = memo(function MigrateGate({
   const shareBalance = useAppSelector(state =>
     selectUserVaultBalanceInShareTokenIncludingDisplaced(state, oldVaultId, walletAddress)
   );
-  const balanceUsd = useAppSelector(state =>
-    selectUserVaultBalanceInUsdIncludingDisplaced(state, oldVaultId, walletAddress)
-  );
-  const hasBalance = balanceUsd.gte(BIG_ONE) && shareBalance.gt(0);
+  const hasBalance = shareBalance.gt(0);
 
   const [dismissed, setDismissed] = useState(false);
   const everHadBalanceRef = useRef(false);
@@ -149,7 +148,12 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
 
+  const oldVault = useAppSelector(state => selectVaultById(state, oldVaultId));
   const newVault = useAppSelector(state => selectVaultById(state, newVaultId));
+  // gov cowcentrated wrapper ("-rp") reads as "pool", standard wrapper ("-vault") as "vault"
+  const typeNoun = t(
+    isCowcentratedGovVault(oldVault) ? 'ReplacementVault-Noun-pool' : 'ReplacementVault-Noun-vault'
+  );
   const isStepping = useAppSelector(selectIsStepperStepping);
   const isExecuting = useAppSelector(selectTransactExecuting);
   const stepperContent = useAppSelector(selectStepperStepContent);
@@ -159,6 +163,13 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
   // user must re-confirm; the updated quote lands in global transact state
   const confirmNeededWithChanges = useAppSelector(selectTransactConfirmNeededWithChanges);
   const confirmUpdatedQuote = useAppSelector(selectTransactSelectedQuoteOrUndefined);
+
+  // only directly-held shares can be migrated; if everything is boost-staked there is nothing to
+  // migrate until the user unstakes (the boost notice guides them), so block the action
+  const migratableBalance = useAppSelector(state =>
+    selectUserVaultBalanceInShareToken(state, oldVaultId)
+  );
+  const hasNothingToMigrate = migratableBalance.isZero();
 
   const [quote, setQuote] = useState<VaultToVaultSingleTokenDepositQuote | undefined>(undefined);
   const [loading, setLoading] = useState(false);
@@ -239,7 +250,12 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
             <Trans
               t={t}
               i18nKey="ReplacementVault-Text"
-              components={{ Highlight: <Highlight />, br: <br /> }}
+              values={{ type: typeNoun }}
+              components={{
+                Highlight: <Highlight />,
+                br: <br />,
+                Link: <ReplacementLink to={`/vault/${newVaultId}`} />,
+              }}
             />
           </div>
 
@@ -266,6 +282,7 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
                       (isStepping ||
                         isExecuting ||
                         loading ||
+                        hasNothingToMigrate ||
                         isDisabledByPriceImpact ||
                         effectiveDisabledByConfirm)
                     }
@@ -297,7 +314,7 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
                     variant="cta"
                     fullWidth={true}
                     borderless={true}
-                    disabled={loading}
+                    disabled={loading || hasNothingToMigrate}
                   >
                     {loading ? t('ReplacementVault-Loading') : t('ReplacementVault-Start')}
                   </Button>
@@ -307,6 +324,7 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
             </>
           }
         </div>
+        <MigrateBoostNotice oldVaultId={oldVaultId} />
       </div>
     </CowAnimationProvider>
   );
@@ -315,6 +333,25 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
 function getOriginalFee(quote: VaultToVaultSingleTokenDepositQuote): number | undefined {
   return isZapFeeDiscounted(quote.fee) ? quote.fee.original : undefined;
 }
+
+/**
+ * Boost-staked shares can't be pulled by the zap, so only the directly-held portion migrates. When
+ * the user has a boost balance in the old vault, surface the same "unstake it first" notice as the
+ * Withdraw tab (its CTA switches the form below to the Boost tab to unstake the remainder).
+ */
+const MigrateBoostNotice = memo(function MigrateBoostNotice({
+  oldVaultId,
+}: {
+  oldVaultId: VaultEntity['id'];
+}) {
+  const boostBalance = useAppSelector(state =>
+    selectUserVaultBalanceInDepositTokenInBoosts(state, oldVaultId)
+  );
+  if (boostBalance.isZero()) {
+    return null;
+  }
+  return <WithdrawBoostNotice vaultId={oldVaultId} balance={boostBalance} />;
+});
 
 const QuoteError = memo(function QuoteError({ error }: { error: SerializedError }) {
   const { t } = useTranslation();
@@ -403,6 +440,13 @@ const ActionsContainer = styled('div', {
 });
 
 const CalmLink = styled(ExternalLink, {
+  base: {
+    color: 'text.lightest',
+    textDecoration: 'underline',
+  },
+});
+
+const ReplacementLink = styled(InternalLink, {
   base: {
     color: 'text.lightest',
     textDecoration: 'underline',

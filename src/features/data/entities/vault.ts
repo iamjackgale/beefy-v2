@@ -364,11 +364,6 @@ export function isVaultEarningPoints(vault: VaultEntity) {
   return vault.earningPoints === true;
 }
 
-/** Whether this vault declares a `replacementVaultId` (i.e. has a newer vault to migrate into). */
-export function isVaultMigratable(vault: VaultEntity) {
-  return !!vault.replacementVaultId;
-}
-
 export function isVaultPausedOrRetired(vault: VaultEntity) {
   return vault.status === 'paused' || vault.status === 'eol';
 }

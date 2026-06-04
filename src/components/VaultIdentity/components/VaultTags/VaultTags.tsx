@@ -23,10 +23,10 @@ import {
   selectActivePromoForVault,
   selectPromoById,
 } from '../../../../features/data/selectors/promos.ts';
+import { selectUserHasBalanceToMigrate } from '../../../../features/data/selectors/balance.ts';
 import { selectTokenByAddress } from '../../../../features/data/selectors/tokens.ts';
 import {
   selectCowcentratedVaultById,
-  selectIsVaultMigratable,
   selectVaultById,
 } from '../../../../features/data/selectors/vaults.ts';
 import { getBoostIconSrc } from '../../../../helpers/boostIconSrc.ts';
@@ -360,7 +360,7 @@ export const VaultTags = memo(function VaultTags({ vaultId, hidePlatform }: Vaul
   const { t } = useTranslation();
   const vault = useAppSelector(state => selectVaultById(state, vaultId));
   const promo = useAppSelector(state => selectActivePromoForVault(state, vaultId));
-  const isMigratable = useAppSelector(state => selectIsVaultMigratable(state, vaultId));
+  const isMigratable = useAppSelector(state => selectUserHasBalanceToMigrate(state, vaultId));
   const isGov = isGovVault(vault);
   const isCowcentratedLike = isCowcentratedLikeVault(vault);
   const isSmallDevice = useMediaQuery('(max-width: 450px)', false);

@@ -14,7 +14,8 @@ import {
   isVaultRetired,
   type VaultEntity,
 } from '../../../data/entities/vault.ts';
-import { selectIsVaultMigratable, selectVaultById } from '../../../data/selectors/vaults.ts';
+import { selectUserHasBalanceToMigrate } from '../../../data/selectors/balance.ts';
+import { selectVaultById } from '../../../data/selectors/vaults.ts';
 import { styles } from './styles.ts';
 
 const useStyles = legacyMakeStyles(styles);
@@ -30,7 +31,7 @@ export const Vault = memo(function Vault({ vaultId }: VaultProps) {
   const isCowcentratedStandard = isCowcentratedStandardVault(vault); // cowcentrated vault
   const isCowcentrated = isCowcentratedVault(vault); // naked clm
   const isGov = !isCowcentratedLikeVault(vault) && isGovVault(vault); // gov but not cowcentrated pool
-  const isMigratable = useAppSelector(state => selectIsVaultMigratable(state, vaultId));
+  const isMigratable = useAppSelector(state => selectUserHasBalanceToMigrate(state, vaultId));
 
   return (
     <Link

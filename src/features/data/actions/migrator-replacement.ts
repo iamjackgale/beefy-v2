@@ -9,7 +9,7 @@ import {
 } from '../apis/transact/transact-types.ts';
 import type { VaultEntity } from '../entities/vault.ts';
 import { isTokenErc20 } from '../entities/token.ts';
-import { selectUserVaultBalanceInShareTokenIncludingDisplaced } from '../selectors/balance.ts';
+import { selectUserVaultBalanceInShareToken } from '../selectors/balance.ts';
 import { selectTokenByAddress } from '../selectors/tokens.ts';
 import { selectVaultById } from '../selectors/vaults.ts';
 import { selectWalletAddress } from '../selectors/wallet.ts';
@@ -47,14 +47,12 @@ async function buildReplacementQuote(
     throw new Error(`No v2v migration option from ${oldVaultId} into ${newVaultId}`);
   }
 
-  // input is the user's full position in the old vault, denominated in its share token
+  // input is the user's directly-held position in the old vault, denominated in its share token.
+  // Boost-staked (and bridged/pending) shares are excluded because the zap can only pull shares
+  // held in the wallet; the card surfaces a notice prompting the user to unstake those separately.
   const oldVault = selectVaultById(state, oldVaultId);
   const shareToken = selectTokenByAddress(state, oldVault.chainId, oldVault.contractAddress);
-  const amount = selectUserVaultBalanceInShareTokenIncludingDisplaced(
-    state,
-    oldVaultId,
-    walletAddress
-  );
+  const amount = selectUserVaultBalanceInShareToken(state, oldVaultId, walletAddress);
   const input: InputTokenAmount = { token: shareToken, amount, max: true };
 
   const quotes = await api.fetchDepositQuotesFor([option], [input], getState);
