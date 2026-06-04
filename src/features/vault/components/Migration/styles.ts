@@ -79,19 +79,6 @@ export const styles = {
   highlight: css.raw({
     color: 'text.warning',
   }),
-  output: css.raw({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '8px',
-    textStyle: 'body.medium',
-    color: 'text.middle',
-  }),
-  outputValue: css.raw({
-    color: 'text.light',
-    fontWeight: 'medium',
-    textAlign: 'right',
-  }),
   feeContainer: css.raw({
     display: 'flex',
     justifyContent: 'space-between',

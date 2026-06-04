@@ -364,10 +364,7 @@ export function isVaultEarningPoints(vault: VaultEntity) {
   return vault.earningPoints === true;
 }
 
-/**
- * Whether a vault has an available migration (shows the "Migrate" tag + card gradient tint).
- * Single source of truth for both {@link VaultTags} and the vault card.
- */
+/** Whether this vault declares a `replacementVaultId` (i.e. has a newer vault to migrate into). */
 export function isVaultMigratable(vault: VaultEntity) {
   return !!vault.replacementVaultId;
 }

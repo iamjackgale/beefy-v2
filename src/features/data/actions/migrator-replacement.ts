@@ -66,7 +66,9 @@ async function buildReplacementQuote(
   // Fetch the quote's allowances into state so the approval-step check (in getTransactSteps) sees
   // the real on-chain allowance and skips approval when already approved. Without this the standalone
   // flow never populates the share-token->zap allowance, so it always asks to approve.
-  const erc20Allowances = quote.allowances.filter(a => isTokenErc20(a.token));
+  const erc20Allowances = quote.allowances.flatMap(a =>
+    isTokenErc20(a.token) ? [{ token: a.token, spenderAddress: a.spenderAddress }] : []
+  );
   const byChainSpender = groupBy(
     uniqBy(erc20Allowances, a => `${a.token.chainId}-${a.spenderAddress}-${a.token.address}`),
     a => `${a.token.chainId}-${a.spenderAddress}`
@@ -77,7 +79,7 @@ async function buildReplacementQuote(
         fetchAllowanceAction({
           chainId: allowances[0].token.chainId,
           spenderAddress: allowances[0].spenderAddress,
-          tokens: allowances.flatMap(a => (isTokenErc20(a.token) ? [a.token] : [])),
+          tokens: allowances.map(a => a.token),
           walletAddress,
         })
       )

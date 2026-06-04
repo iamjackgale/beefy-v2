@@ -124,7 +124,6 @@ const MigrateGate = memo(function MigrateGate({
   const hasBalance = balanceUsd.gte(BIG_ONE) && shareBalance.gt(0);
 
   const [dismissed, setDismissed] = useState(false);
-  // latch: stays true once the user has ever been seen with a balance this session
   const everHadBalanceRef = useRef(false);
   if (hasBalance) {
     everHadBalanceRef.current = true;
@@ -166,7 +165,6 @@ const Migrate = memo(function Migrate({ oldVaultId, newVaultId, onDismiss }: Mig
   const [error, setError] = useState<SerializedError | undefined>(undefined);
   const [isDisabledByConfirm, setIsDisabledByConfirm] = useState(false);
   const [isDisabledByPriceImpact, setIsDisabledByPriceImpact] = useState(false);
-  // whether a quote has ever been requested (so slippage changes re-fetch, but only after preview)
   const requestedRef = useRef(false);
 
   const fetchQuote = useCallback(() => {

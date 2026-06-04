@@ -107,21 +107,13 @@ export const selectVaultUnderlyingVault = (
 export const selectReplacementVaultIdForVaultOrUndefined = (
   state: BeefyState,
   vaultId: VaultEntity['id']
-): VaultEntity['id'] | undefined => {
-  const vault = selectVaultByIdOrUndefined(state, vaultId);
-  const replacementVaultId: VaultEntity['id'] | undefined = vault?.replacementVaultId;
-  return replacementVaultId || undefined;
-};
+): VaultEntity['id'] | undefined => selectVaultByIdOrUndefined(state, vaultId)?.replacementVaultId;
 
 /** Given a NEW vault id, the OLD vault id that declares it as its replacement, if any */
 export const selectOldVaultIdReplacedByOrUndefined = (
   state: BeefyState,
   newVaultId: VaultEntity['id']
-): VaultEntity['id'] | undefined => {
-  const oldVaultId: VaultEntity['id'] | undefined =
-    state.entities.vaults.relations.replacedBy.byId[newVaultId];
-  return oldVaultId || undefined;
-};
+): VaultEntity['id'] | undefined => state.entities.vaults.relations.replacedBy.byId[newVaultId];
 
 export type VaultReplacementMigration = {
   /** the wrapper vault the user holds / migrates from */
@@ -131,12 +123,12 @@ export type VaultReplacementMigration = {
 };
 
 /** The active wrapper (gov pool / standard vault) of a CLM that matches the given wrapper kind. */
-function selectMatchingWrapperId(
-  state: BeefyState,
+function getMatchingWrapperId(
+  byId: BeefyState['entities']['vaults']['byId'],
   clmId: VaultEntity['id'],
   kind: 'pool' | 'vault'
 ): VaultEntity['id'] | undefined {
-  const clm = selectVaultByIdOrUndefined(state, clmId);
+  const clm = byId[clmId];
   if (!clm || !isCowcentratedLikeVault(clm)) return undefined;
   return kind === 'pool' ? getCowcentratedPool(clm) : getCowcentratedVault(clm);
 }
@@ -151,57 +143,59 @@ function selectMatchingWrapperId(
  * Returns undefined if the page vault is not a cowcentrated wrapper involved in a replacement,
  * or if the matching wrapper on the other side does not exist.
  */
-export const selectVaultReplacementMigration = (
-  state: BeefyState,
-  pageVaultId: VaultEntity['id']
-): VaultReplacementMigration | undefined => {
-  const pageVault = selectVaultByIdOrUndefined(state, pageVaultId);
-  if (!pageVault) return undefined;
-  // only wrapper vaults (gov pool / standard vault) are user-holdable; naked CLM is hidden
-  let kind: 'pool' | 'vault';
-  if (isCowcentratedGovVault(pageVault)) {
-    kind = 'pool';
-  } else if (isCowcentratedStandardVault(pageVault)) {
-    kind = 'vault';
-  } else {
+export const selectVaultReplacementMigration = createCachedSelector(
+  (_state: BeefyState, pageVaultId: VaultEntity['id']) => pageVaultId,
+  (state: BeefyState) => state.entities.vaults.byId,
+  (state: BeefyState) => state.entities.vaults.relations.replacedBy.byId,
+  (pageVaultId, byId, replacedBy): VaultReplacementMigration | undefined => {
+    const pageVault = byId[pageVaultId];
+    if (!pageVault) return undefined;
+    // only wrapper vaults (gov pool / standard vault) are user-holdable; naked CLM is hidden
+    let kind: 'pool' | 'vault';
+    if (isCowcentratedGovVault(pageVault)) {
+      kind = 'pool';
+    } else if (isCowcentratedStandardVault(pageVault)) {
+      kind = 'vault';
+    } else {
+      return undefined;
+    }
+
+    const pageClmId = pageVault.cowcentratedIds.clm;
+
+    // page is OLD: its CLM declares a replacement CLM
+    const newClmId = byId[pageClmId]?.replacementVaultId;
+    if (newClmId) {
+      const newWrapperId = getMatchingWrapperId(byId, newClmId, kind);
+      return newWrapperId ? { oldVaultId: pageVaultId, newVaultId: newWrapperId } : undefined;
+    }
+
+    // page is NEW: some old CLM declares this CLM as its replacement
+    const oldClmId = replacedBy[pageClmId];
+    if (oldClmId) {
+      const oldWrapperId = getMatchingWrapperId(byId, oldClmId, kind);
+      return oldWrapperId ? { oldVaultId: oldWrapperId, newVaultId: pageVaultId } : undefined;
+    }
+
     return undefined;
   }
-
-  const pageClmId = pageVault.cowcentratedIds.clm;
-
-  // page is OLD: its CLM declares a replacement CLM
-  const newClmId = selectReplacementVaultIdForVaultOrUndefined(state, pageClmId);
-  if (newClmId) {
-    const newWrapperId = selectMatchingWrapperId(state, newClmId, kind);
-    if (!newWrapperId) return undefined;
-    return { oldVaultId: pageVaultId, newVaultId: newWrapperId };
-  }
-
-  // page is NEW: some old CLM declares this CLM as its replacement
-  const oldClmId = selectOldVaultIdReplacedByOrUndefined(state, pageClmId);
-  if (oldClmId) {
-    const oldWrapperId = selectMatchingWrapperId(state, oldClmId, kind);
-    if (!oldWrapperId) return undefined;
-    return { oldVaultId: oldWrapperId, newVaultId: pageVaultId };
-  }
-
-  return undefined;
-};
+)((_state: BeefyState, pageVaultId: VaultEntity['id']) => pageVaultId);
 
 /**
- * Whether to show the "Migrate" tag/gradient for a vault. True when the vault is migratable on its
- * own ({@link isVaultMigratable} — legacy LP migrators), OR it is the OLD wrapper of a
- * replacement-vault migration. `replacementVaultId` lives on the hidden naked CLM, so this resolves
- * the user-facing wrapper via {@link selectVaultReplacementMigration} and tags it when it is the
- * source (old) side of the migration.
+ * Whether to show the "Migrate" tag/gradient for a vault. True when the vault declares a
+ * `replacementVaultId`, OR it is the OLD wrapper of a replacement-vault migration. Because
+ * `replacementVaultId` lives on the hidden naked CLM, the user-facing wrapper is resolved via
+ * {@link selectVaultReplacementMigration} and tagged when it is the source (old) side.
  */
-export const selectIsVaultMigratable = (state: BeefyState, vaultId: VaultEntity['id']): boolean => {
-  const vault = selectVaultByIdOrUndefined(state, vaultId);
-  if (!vault) return false;
-  if (isVaultMigratable(vault)) return true;
-  const migration = selectVaultReplacementMigration(state, vaultId);
-  return !!migration && migration.oldVaultId === vaultId;
-};
+export const selectIsVaultMigratable = createCachedSelector(
+  (state: BeefyState, vaultId: VaultEntity['id']) => selectVaultByIdOrUndefined(state, vaultId),
+  (state: BeefyState, vaultId: VaultEntity['id']) =>
+    selectVaultReplacementMigration(state, vaultId),
+  (_state: BeefyState, vaultId: VaultEntity['id']) => vaultId,
+  (vault, migration, vaultId): boolean => {
+    if (!vault) return false;
+    return isVaultMigratable(vault) || migration?.oldVaultId === vaultId;
+  }
+)((_state: BeefyState, vaultId: VaultEntity['id']) => vaultId);
 
 export const selectIsVaultPausedOrRetired = createCachedSelector(
   (state: BeefyState, vaultId: VaultEntity['id']) => selectVaultById(state, vaultId),
