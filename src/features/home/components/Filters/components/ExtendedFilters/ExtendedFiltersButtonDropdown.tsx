@@ -50,7 +50,8 @@ export const ExtendedFiltersButtonDropdown = memo(function ExtendedFiltersButton
     onOpenChange,
     middleware: [
       offset(8),
-      flip({ padding: 12, crossAxis: true, fallbackAxisSideDirection: 'start' }),
+      // vertical-only flip; a side-axis fallback would detach the panel from the button
+      flip({ padding: 12, crossAxis: true }),
       shift({ padding: 12 }),
     ],
   });
