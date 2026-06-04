@@ -128,8 +128,7 @@ export const transactFetchOptions = createAppAsyncThunk<
       mode === TransactMode.Boost ||
       mode === TransactMode.Migrate
     ) {
-      // Migrate has no option-fetching method (its quote is built directly via
-      // transactFetchMigrationQuote); the thunk's `condition` also blocks these modes.
+      // these modes have no option-fetching method (Migrate builds its quote directly)
       throw new Error(`Claim, Boost or Migrate mode not supported.`);
     }
 

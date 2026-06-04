@@ -96,11 +96,9 @@ export type TransactFetchMigrationQuoteArgs = {
 };
 
 /**
- * Build the v2v migration quote and store it in the SHARED transact quotes slice (the reducer
- * cases for this thunk live in `reducers/wallet/transact.ts`, mirroring `transactFetchQuotes`).
- * The Migrate tab has no input field, so it drives this directly (on mount + on slippage change)
- * instead of going through the input-driven `transactFetchQuotes` path; the quote is then read via
- * the standard `selectTransactSelectedQuote*` selectors — no longer isolated in local state.
+ * Builds the v2v migration quote and stores it in the shared transact quotes slice (reducer cases
+ * in `reducers/wallet/transact.ts`), so the standard `selectTransactSelectedQuote*` selectors work.
+ * The Migrate tab drives this directly since it has no input field.
  */
 export const transactFetchMigrationQuote = createAppAsyncThunk<
   { quotes: TransactQuote[] },

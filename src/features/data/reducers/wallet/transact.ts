@@ -299,8 +299,7 @@ const transactSlice = createSlice({
           }
         }
       })
-      // Migrate tab: externally-built v2v quote stored in the shared quotes slice (mirrors the
-      // transactFetchQuotes cases above so the standard quote selectors/components work for migrate).
+      // Migrate quote is built externally but stored in the shared slice (mirrors transactFetchQuotes).
       .addCase(transactFetchMigrationQuote.pending, (sliceState, action) => {
         resetQuotes(sliceState);
         sliceState.quotes.status = TransactStatus.Pending;

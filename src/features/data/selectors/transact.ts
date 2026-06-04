@@ -209,7 +209,7 @@ export const selectTransactWithdrawInputAmountExceedsBalance = (state: BeefyStat
   const userBalance =
     isVaultSourceWithdraw ?
       selectUserVaultBalanceInShareToken(state, vaultId)
-    : selectUserVaultBalanceInDepositToken(state, vaultId);
+      : selectUserVaultBalanceInDepositToken(state, vaultId);
   const value = selectTransactInputIndexAmount(state, 0);
 
   return value.gt(userBalance);
@@ -548,7 +548,7 @@ export function selectTransactCrossChainPreflight(state: BeefyState): boolean {
         state,
         convertVaultShareToDepositTokenAmount(state, option.srcVaultId, inputAmounts[0] || BIG_ZERO)
       )
-    : BigNumber.sum(
+      : BigNumber.sum(
         ...option.inputs.map((token, i) =>
           selectTokenAmountValue(state, { token, amount: inputAmounts[i] || BIG_ZERO })
         )
@@ -591,7 +591,7 @@ export const selectCrossChainSortedChains = (
     const totalBalanceUsd =
       walletAddress ?
         selectDepositOptionTokensBalanceByChainId(state, chainId, walletAddress)
-      : BIG_ZERO;
+        : BIG_ZERO;
 
     const selectionIds = state.ui.transact.selections.byChainId[chainId];
     const seenAddresses = new Set<string>();
@@ -691,11 +691,11 @@ export const selectTransactShouldShowClaimsNotification = createSelector(
     userHasUnclaimedStellaSwapRewards
   ): PulseHighlightProps['variant'] | false => {
     return (
-        userHasUnclaimedGovRewards ||
-          userHasUnclaimedMerklRewards ||
-          userHasUnclaimedStellaSwapRewards
-      ) ?
-        'success'
+      userHasUnclaimedGovRewards ||
+      userHasUnclaimedMerklRewards ||
+      userHasUnclaimedStellaSwapRewards
+    ) ?
+      'success'
       : false;
   }
 );
@@ -809,10 +809,6 @@ export const selectCrossChainRecoveryQuoteIsStale = (state: BeefyState) =>
 
 export const selectTransactSuccessClosed = (state: BeefyState) => state.ui.transact.successClosed;
 
-/**
- * Whether to show (and default to) the Migrate tab: the page vault has a v2v replacement AND the
- * connected user holds a migratable balance in it. Mirrors the gating the standalone card used.
- */
 export const selectTransactShouldShowMigrate = (
   state: BeefyState,
   vaultId: VaultEntity['id'] | undefined
