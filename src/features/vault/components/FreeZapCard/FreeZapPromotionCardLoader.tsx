@@ -1,6 +1,5 @@
 import { lazy, memo } from 'react';
 import { useAppSelector } from '../../../data/store/hooks.ts';
-import { isVaultFreeZap } from '../../../data/entities/vault.ts';
 import { selectVaultById } from '../../../data/selectors/vaults.ts';
 import type { VaultEntity } from '../../../data/entities/vault.ts';
 
@@ -15,8 +14,8 @@ export type FreeZapPromotionCardLoaderProps = {
 export const FreeZapPromotionCardLoader = memo(function FreeZapPromotionCardLoader({
   vaultId,
 }: FreeZapPromotionCardLoaderProps) {
-  const vault = useAppSelector(state => selectVaultById(state, vaultId));
-  if (!isVaultFreeZap(vault)) {
+  const zapCampaign = useAppSelector(state => selectVaultById(state, vaultId));
+  if (!zapCampaign) {
     return null;
   }
 

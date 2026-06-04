@@ -11,12 +11,12 @@ import {
   isCowcentratedStandardVault,
   isCowcentratedVault,
   isGovVault,
-  isVaultFreeZap,
   isVaultRetired,
   type VaultEntity,
 } from '../../../data/entities/vault.ts';
 import { selectVaultById } from '../../../data/selectors/vaults.ts';
 import { styles } from './styles.ts';
+import { selectZapCampaignByVaultId } from '../../../data/selectors/zap.ts';
 
 const useStyles = legacyMakeStyles(styles);
 
@@ -31,7 +31,7 @@ export const Vault = memo(function Vault({ vaultId }: VaultProps) {
   const isCowcentratedStandard = isCowcentratedStandardVault(vault); // cowcentrated vault
   const isCowcentrated = isCowcentratedVault(vault); // naked clm
   const isGov = !isCowcentratedLikeVault(vault) && isGovVault(vault); // gov but not cowcentrated pool
-  const isFreeZap = isVaultFreeZap(vault);
+  const zapCampaign = useAppSelector(state => selectZapCampaignByVaultId(state, vaultId));
 
   return (
     <Link
@@ -43,7 +43,7 @@ export const Vault = memo(function Vault({ vaultId }: VaultProps) {
         isCowcentratedStandard && styles.vaultCowcentratedVault,
         isRetired && styles.vaultRetired,
         isGov && styles.vaultEarnings,
-        isFreeZap && styles.vaultFreeZap
+        zapCampaign && styles.vaultFreeZap
       )}
     >
       <div className={classes.vaultInner}>

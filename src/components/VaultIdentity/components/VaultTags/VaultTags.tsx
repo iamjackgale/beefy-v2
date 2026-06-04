@@ -10,7 +10,6 @@ import {
   isGovVault,
   isVaultActive,
   isVaultEarningPoints,
-  isVaultFreeZap,
   isVaultPaused,
   isVaultRetired,
   type VaultCowcentrated,
@@ -43,6 +42,7 @@ import { VaultPlatform } from '../../../VaultPlatform/VaultPlatform.tsx';
 import { styles } from './styles.ts';
 import { VaultTag, VaultTagWithTooltip, type VaultTagWithTooltipProps } from './VaultTag.tsx';
 import { styled } from '@repo/styles/jsx';
+import { selectZapCampaignByVaultId } from '../../../../features/data/selectors/zap.ts';
 
 const useStyles = legacyMakeStyles(styles);
 
@@ -361,6 +361,7 @@ export const VaultTags = memo(function VaultTags({ vaultId, hidePlatform }: Vaul
   const { t } = useTranslation();
   const vault = useAppSelector(state => selectVaultById(state, vaultId));
   const promo = useAppSelector(state => selectActivePromoForVault(state, vaultId));
+  const zapCampaign = useAppSelector(state => selectZapCampaignByVaultId(state, vaultId));
   const isGov = isGovVault(vault);
   const isCowcentratedLike = isCowcentratedLikeVault(vault);
   const isSmallDevice = useMediaQuery('(max-width: 450px)', false);
@@ -379,7 +380,7 @@ export const VaultTags = memo(function VaultTags({ vaultId, hidePlatform }: Vaul
       : isGov ?
         <VaultTag css={styles.vaultTagPool} text={t('VaultTag-Pool')} />
       : <VaultTag css={styles.vaultTagVault} text={t('VaultTag-Vault')} />}
-      {isVaultFreeZap(vault) && <VaultFreeZapTag />}
+      {zapCampaign && <VaultFreeZapTag />}
       {isVaultRetired(vault) ?
         <VaultTag css={styles.vaultTagRetired} text={t('VaultTag-Retired')} />
       : isVaultPaused(vault) ?

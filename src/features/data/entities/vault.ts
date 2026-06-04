@@ -362,20 +362,6 @@ export function isVaultEarningPoints(vault: VaultEntity) {
   return vault.earningPoints === true;
 }
 
-/**
- * Whether a vault qualifies for the "Free Zap" promotion (tag + card gradient tint).
- * TODO: not yet wired to data — returns false until the free-zap source of truth exists.
- * Single point to enable the feature for both {@link VaultTags} and the vault card.
- */
-export function isVaultFreeZap(vault: VaultEntity) {
-  return (
-    vault.id == 'morpho-v2-ethereum-steakhouse-reservoir-usdc' ||
-    vault.id === 'aerodrome-cow-base-afc-usdc-vault' ||
-    vault.id === 'aerodrome-cow-base-afc-usdc-rp' ||
-    vault.id === 'aerodrome-cow-base-msusd-mseth-rp'
-  );
-}
-
 export function isVaultPausedOrRetired(vault: VaultEntity) {
   return vault.status === 'paused' || vault.status === 'eol';
 }
