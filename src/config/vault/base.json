@@ -22859,6 +22859,125 @@
     ]
   },
   {
+    "id": "aerodrome-cow-base-tea-usdc-vault",
+    "name": "TEA-USDC",
+    "type": "standard",
+    "token": "TEA-USDC",
+    "tokenAddress": "0x3549ce8C62989407342A2bB1742Dc1eF4a1Cbe71",
+    "tokenDecimals": 18,
+    "tokenProviderId": "aerodrome",
+    "earnContractAddress": "0x7388aa8B467BeE0eB46A822876Ed3FC7cA12D3B7",
+    "earnedToken": "mooCowAerodromeTEA-USDC",
+    "earnedTokenAddress": "0x7388aa8B467BeE0eB46A822876Ed3FC7cA12D3B7",
+    "oracle": "lps",
+    "oracleId": "aerodrome-cow-base-tea-usdc",
+    "status": "active",
+    "createdAt": 1780541907,
+    "platformId": "aerodrome",
+    "assets": ["TEA", "USDC"],
+    "risks": {
+      "complex": true,
+      "curated": false,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": true,
+      "notTimelocked": true,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "pool",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "vault-composer"
+      },
+      {
+        "strategyId": "reward-pool-to-vault"
+      }
+    ]
+  },
+  {
+    "id": "aerodrome-cow-base-tea-usdc-rp",
+    "name": "TEA-USDC Reward Pool",
+    "type": "gov",
+    "version": 2,
+    "token": "cowAerodromeTEA-USDC",
+    "tokenAddress": "0x3549ce8C62989407342A2bB1742Dc1eF4a1Cbe71",
+    "tokenDecimals": 18,
+    "tokenProviderId": "aerodrome",
+    "earnContractAddress": "0x81181bA5b00152e0298ef3C6917870f7114665EE",
+    "earnedToken": "rCowAerodromeTEA-USDC",
+    "earnedTokenDecimals": 18,
+    "earnedTokenAddresses": ["0x940181a94A35A4569E4529A3CDfB74e38FD98631"],
+    "oracle": "lps",
+    "oracleId": "aerodrome-cow-base-tea-usdc",
+    "status": "active",
+    "createdAt": 1780541867,
+    "platformId": "aerodrome",
+    "assets": ["TEA", "USDC"],
+    "risks": {
+      "complex": true,
+      "curated": false,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": true,
+      "notTimelocked": true,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "pool",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "gov-composer"
+      },
+      {
+        "strategyId": "reward-pool-to-vault"
+      }
+    ]
+  },
+  {
+    "id": "aerodrome-cow-base-tea-usdc",
+    "name": "TEA-USDC",
+    "type": "cowcentrated",
+    "token": "TEA-USDC aerodrome",
+    "tokenAddress": "0xAbe1f289107C20081F591BB3972b8289aDd64f6C",
+    "tokenDecimals": 18,
+    "tokenProviderId": "aerodrome",
+    "depositTokenAddresses": [
+      "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "0xa1A0B2E02B0E6830aD5A4A7211691200945d8919"
+    ],
+    "earnContractAddress": "0x3549ce8C62989407342A2bB1742Dc1eF4a1Cbe71",
+    "earnedToken": "cowAerodromeTEA-USDC",
+    "earnedTokenAddress": "0x3549ce8C62989407342A2bB1742Dc1eF4a1Cbe71",
+    "oracle": "lps",
+    "oracleId": "aerodrome-cow-base-tea-usdc",
+    "status": "active",
+    "createdAt": 1780541855,
+    "platformId": "beefy",
+    "feeTier": "1",
+    "tickSpacing": 200,
+    "assets": ["TEA", "USDC"],
+    "risks": {
+      "complex": true,
+      "curated": false,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": true,
+      "notTimelocked": true,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "pool",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "cowcentrated"
+      }
+    ]
+  },
+  {
     "id": "aerodrome-cow-base-weth-usol-vault",
     "name": "WETH-uSOL",
     "type": "standard",
