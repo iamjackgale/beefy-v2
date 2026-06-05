@@ -1127,7 +1127,7 @@ const config = buildConfig(
       arbitrum: { primary: '#2d374b', header: '#289fef33' },
       aurora: { primary: '#70d44b', header: 0.2 },
       avax: { primary: '#e74142', header: 0.2 },
-      base: { primary: '#ffffff', header: '#0052ff33' },
+      base: { primary: '#ffffff', header: '#0000ff5e' },
       berachain: { primary: '#814625', header: 1 },
       bsc: { primary: '#f0b90b', header: 0.2 },
       canto: { primary: '#06fc99', header: 0.2 },
