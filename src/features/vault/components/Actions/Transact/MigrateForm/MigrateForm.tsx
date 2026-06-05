@@ -3,11 +3,9 @@ import { css } from '@repo/styles/css';
 import { styled } from '@repo/styles/jsx';
 import { useAppSelector } from '../../../../../data/store/hooks.ts';
 import type { VaultEntity } from '../../../../../data/entities/vault.ts';
-import { selectUserVaultBalanceInDepositTokenInBoosts } from '../../../../../data/selectors/balance.ts';
 import { selectTransactVaultId } from '../../../../../data/selectors/transact.ts';
 import { selectVaultReplacementMigration } from '../../../../../data/selectors/vaults.ts';
 import { FeaturedVaultCard } from '../../../../../home/components/FeaturedVaultCard/FeaturedVaultCard.tsx';
-import WithdrawBoostNotice from '../FormStepFooter/WithdrawBoostNotice.tsx';
 import { MigrateActions } from '../MigrateActions/MigrateActions.tsx';
 import { MigrateNotice, MigrateZapNotice } from './MigrateTexts.tsx';
 
@@ -53,24 +51,8 @@ const MigrateForm = memo(function MigrateForm({ oldVaultId, newVaultId }: Migrat
           <MigrateActions oldVaultId={oldVaultId} newVaultId={newVaultId} />
         </Section>
       </Container>
-      <MigrateBoostNotice oldVaultId={oldVaultId} />
     </>
   );
-});
-
-/** Boost-staked shares can't be zapped — prompt the user to unstake them first. */
-const MigrateBoostNotice = memo(function MigrateBoostNotice({
-  oldVaultId,
-}: {
-  oldVaultId: VaultEntity['id'];
-}) {
-  const boostBalance = useAppSelector(state =>
-    selectUserVaultBalanceInDepositTokenInBoosts(state, oldVaultId)
-  );
-  if (boostBalance.isZero()) {
-    return null;
-  }
-  return <WithdrawBoostNotice vaultId={oldVaultId} balance={boostBalance} />;
 });
 
 const Container = styled('div', {
