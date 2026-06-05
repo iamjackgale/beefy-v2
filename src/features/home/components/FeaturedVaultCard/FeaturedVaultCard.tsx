@@ -33,7 +33,7 @@ export const FeaturedVaultCard = memo(function FeaturedVaultCard({
   const imageSize = vault.assetIds.length === 1 ? 32 : 40;
 
   return (
-    <Card to={`/vault/${vaultId}`} className={css(cssProp)}>
+    <Card to={`/vault/${vaultId}`} css={cssProp}>
       {showChainBadge && (
         <ChainBadge
           className={css(
