@@ -1,4 +1,3 @@
-import type { Namespace, TFunction } from 'react-i18next';
 import { groupBy, uniqBy } from 'lodash-es';
 import { getTransactApi } from '../apis/instances.ts';
 import {
@@ -15,10 +14,9 @@ import { selectUserVaultBalanceInShareToken } from '../selectors/balance.ts';
 import { selectTokenByAddress } from '../selectors/tokens.ts';
 import { selectVaultById } from '../selectors/vaults.ts';
 import { selectWalletAddress } from '../selectors/wallet.ts';
-import type { BeefyDispatchFn, BeefyState, BeefyStateFn, BeefyThunk } from '../store/types.ts';
+import type { BeefyDispatchFn, BeefyState, BeefyStateFn } from '../store/types.ts';
 import { createAppAsyncThunk } from '../utils/store-utils.ts';
 import { fetchAllowanceAction } from './allowance.ts';
-import { transactSteps } from './wallet/transact.ts';
 
 /**
  * Standalone same-chain vault-to-vault (v2v) migration, fully decoupled from the transact form.
@@ -118,16 +116,3 @@ export const transactFetchMigrationQuote = createAppAsyncThunk<
     }
   }
 );
-
-/**
- * "Migrate now" CTA: run approval(s) + the zap via the shared stepper.
- * Reuses {@link transactSteps}, which builds allowance steps from `quote.allowances`, re-quotes to
- * guard against price drift (populating the global confirm state consumed by `ConfirmNotice`), and
- * starts the stepper. It only reads slippage from transact state.
- */
-export function executeReplacementMigration(
-  quote: TransactQuote,
-  t: TFunction<Namespace>
-): BeefyThunk {
-  return transactSteps(quote, t);
-}

@@ -6,15 +6,13 @@ import { Button } from '../../../../../../components/Button/Button.tsx';
 import { AlertError } from '../../../../../../components/Alerts/Alerts.tsx';
 import { ExternalLink } from '../../../../../../components/Links/ExternalLink.tsx';
 import { useAppDispatch, useAppSelector } from '../../../../../data/store/hooks.ts';
-import {
-  executeReplacementMigration,
-  transactFetchMigrationQuote,
-} from '../../../../../data/actions/migrator-replacement.ts';
+import { transactFetchMigrationQuote } from '../../../../../data/actions/migrator-replacement.ts';
 import {
   transactClearQuotes,
   transactSetSuccessClosed,
   transactSwitchMode,
 } from '../../../../../data/actions/transact.ts';
+import { transactSteps } from '../../../../../data/actions/wallet/transact.ts';
 import { stepperReset } from '../../../../../data/actions/wallet/stepper.ts';
 import { StepContent } from '../../../../../data/reducers/wallet/stepper-types.ts';
 import {
@@ -104,7 +102,7 @@ export const MigrateActions = memo(function MigrateActions({
 
   const handleMigrate = useCallback(() => {
     if (quote) {
-      dispatch(executeReplacementMigration(quote, t));
+      dispatch(transactSteps(quote, t));
     }
   }, [dispatch, quote, t]);
 
