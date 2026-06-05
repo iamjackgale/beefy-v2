@@ -2,7 +2,11 @@ import { memo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { styled } from '@repo/styles/jsx';
 import { useAppSelector } from '../../../../../data/store/hooks.ts';
-import { isCowcentratedGovVault, type VaultEntity } from '../../../../../data/entities/vault.ts';
+import {
+  isCowcentratedGovVault,
+  isVaultRetired,
+  type VaultEntity,
+} from '../../../../../data/entities/vault.ts';
 import { selectVaultById } from '../../../../../data/selectors/vaults.ts';
 
 export const MigrateNotice = memo(function MigrateNotice({
@@ -12,14 +16,18 @@ export const MigrateNotice = memo(function MigrateNotice({
 }) {
   const { t } = useTranslation();
   const oldVault = useAppSelector(state => selectVaultById(state, oldVaultId));
+
   // gov cowcentrated wrapper ("-rp") reads as "pool", standard wrapper ("-vault") as "vault"
   const typeNoun = t(
     isCowcentratedGovVault(oldVault) ? 'ReplacementVault-Noun-pool' : 'ReplacementVault-Noun-vault'
   );
 
+  const i18nKey =
+    isVaultRetired(oldVault) ? 'ReplacementVault-Notice-Retired' : 'ReplacementVault-Notice';
+
   return (
     <Notice>
-      <Trans t={t} i18nKey="ReplacementVault-Notice" values={{ type: typeNoun }} />
+      <Trans t={t} i18nKey={i18nKey} p values={{ type: typeNoun }} />
     </Notice>
   );
 });
