@@ -176,6 +176,7 @@ export function addTransactListeners() {
         return;
       }
       const state = getState();
+      if (selectTransactMode(state) !== TransactMode.Migrate) return;
       const oldVaultId = action.meta.arg.vaultId;
       const walletAddress = selectWalletAddress(state);
       if (!walletAddress) {
