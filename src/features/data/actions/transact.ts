@@ -120,7 +120,6 @@ export type TransactFetchOptionsPayload = {
 const optionsForByMode = {
   [TransactMode.Deposit]: 'fetchDepositOptionsFor',
   [TransactMode.Withdraw]: 'fetchWithdrawOptionsFor',
-  // Migrate is a v2v deposit into the replacement vault, sourced from the page vault.
   [TransactMode.Migrate]: 'fetchDepositOptionsFor',
 } as const satisfies Partial<Record<TransactMode, keyof ITransactApi>>;
 
@@ -140,8 +139,6 @@ export const transactFetchOptions = createAppAsyncThunk<
 
     let options: TransactOption[];
     if (mode === TransactMode.Migrate) {
-      // Deposit into the replacement vault, sourced from the page vault: fetch the new vault's
-      // deposit options and keep only the v2v one whose source is the page (old) vault.
       const migration = selectVaultReplacementMigration(state, vaultId);
       if (!migration) {
         throw new Error(`No replacement migration for ${vaultId}`);
