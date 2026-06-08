@@ -356,15 +356,24 @@ export const selectUserVaultBalanceInShareTokenIncludingDisplaced = createCached
  * replacement-vault migration AND the user must hold a non-zero balance in it (including boost and
  * displaced shares). Lives here (not in selectors/vaults) because it depends on user balances.
  */
-export const selectUserHasBalanceToMigrate = createCachedSelector(
-  (state: BeefyState, vaultId: VaultEntity['id']) =>
-    selectVaultReplacementMigration(state, vaultId),
-  (state: BeefyState, vaultId: VaultEntity['id']) =>
-    selectUserVaultBalanceInShareTokenIncludingDisplaced(state, vaultId),
-  (_state: BeefyState, vaultId: VaultEntity['id']) => vaultId,
-  (migration, balance, vaultId): boolean =>
-    migration?.oldVaultId === vaultId && balance.gt(BIG_ZERO)
-)((_state: BeefyState, vaultId: VaultEntity['id']) => vaultId);
+export const selectUserHasBalanceToMigrate = (
+  state: BeefyState,
+  vaultId: VaultEntity['id']
+): boolean => {
+  const migration = selectVaultReplacementMigration(state, vaultId);
+  if (!migration) {
+    return false;
+  }
+  const walletAddress = selectWalletAddress(state);
+  if (!walletAddress) {
+    return false;
+  }
+  return selectUserVaultBalanceInShareTokenIncludingDisplaced(
+    state,
+    migration.oldVaultId,
+    walletAddress
+  ).gt(BIG_ZERO);
+};
 
 /**
  * Total not in active boost
