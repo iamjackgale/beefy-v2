@@ -49,6 +49,7 @@ import {
 } from '../../../../../data/selectors/transact.ts';
 import { selectZapSwapProviderName } from '../../../../../data/selectors/zap.ts';
 import { QuoteTitle } from '../QuoteTitle/QuoteTitle.tsx';
+import { QuoteTitleRefresh } from '../QuoteTitleRefresh/QuoteTitleRefresh.tsx';
 import { ProviderIcon } from '../ProviderIcon/ProviderIcon.tsx';
 import ExpandMore from '../../../../../../images/icons/mui/ExpandMore.svg?react';
 import { styles } from './styles.ts';
@@ -579,11 +580,13 @@ export type ZapRouteProps = {
   quote: ZapQuote;
   css?: CssStyles;
   expandable?: boolean;
+  enableRefresh?: boolean;
 };
 export const ZapRoute = memo(function ZapRoute({
   quote,
   css: cssProp,
   expandable = false,
+  enableRefresh = false,
 }: ZapRouteProps) {
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -657,7 +660,9 @@ export const ZapRoute = memo(function ZapRoute({
 
   return (
     <div className={css(cssProp)}>
-      <div className={css(styles.title)}>{t('Transact-ZapRoute')}</div>
+      {enableRefresh ?
+        <QuoteTitleRefresh title={t('Transact-ZapRoute')} enableRefresh={true} />
+      : <div className={css(styles.title)}>{t('Transact-ZapRoute')}</div>}
       <div className={css(styles.routeHolder)}>
         <div
           className={css(styles.routeHeader, headerClickable && styles.routerHeaderClickable)}

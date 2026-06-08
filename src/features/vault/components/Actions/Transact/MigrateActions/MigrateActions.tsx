@@ -145,7 +145,7 @@ export const MigrateActions = memo(function MigrateActions({
   if (hasQuote && isZapQuote(quote)) {
     return (
       <>
-        <ZapRoute quote={quote} expandable={true} />
+        <ZapRoute quote={quote} expandable={true} enableRefresh={!isComplete} />
         <ZapSlippage />
         <PriceImpactNotice quote={quote} onChange={setIsDisabledByPriceImpact} />
         <ConfirmNotice onChange={setIsDisabledByConfirm} />
