@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { styled } from '@repo/styles/jsx';
 import { AnimatedButton } from '../../../../../../components/Button/AnimatedButton.tsx';
@@ -36,6 +36,7 @@ import {
   selectTransactQuoteError,
   selectTransactQuoteStatus,
   selectTransactSelectedQuoteOrUndefined,
+  selectTransactSlippage,
   selectTransactSuccessClosed,
 } from '../../../../../data/selectors/transact.ts';
 import { selectVaultById } from '../../../../../data/selectors/vaults.ts';
@@ -62,6 +63,7 @@ export const MigrateActions = memo(function MigrateActions({
   const quote = useAppSelector(selectTransactSelectedQuoteOrUndefined);
   const quoteStatus = useAppSelector(selectTransactQuoteStatus);
   const quoteError = useAppSelector(selectTransactQuoteError);
+  const slippage = useAppSelector(selectTransactSlippage);
   const isStepping = useAppSelector(selectIsStepperStepping);
   const isExecuting = useAppSelector(selectTransactExecuting);
   const stepperContent = useAppSelector(selectStepperStepContent);
@@ -81,6 +83,19 @@ export const MigrateActions = memo(function MigrateActions({
   const fetchQuote = useCallback(() => {
     dispatch(transactFetchQuotes());
   }, [dispatch]);
+
+  // re-quote when slippage changes, but only once a quote has been previewed and not mid-stepper
+  const skipInitialSlippageRequote = useRef(true);
+  useEffect(() => {
+    if (skipInitialSlippageRequote.current) {
+      skipInitialSlippageRequote.current = false;
+      return;
+    }
+    if (quote && !isStepping && !hasNothingToMigrate) {
+      dispatch(transactFetchQuotes());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on slippage only
+  }, [slippage]);
 
   // clear on unmount so deposit/withdraw don't inherit the migrate quote
   useEffect(() => {
