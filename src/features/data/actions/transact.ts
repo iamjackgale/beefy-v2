@@ -56,7 +56,6 @@ export type TransactInitArgs = {
 
 export type TransactInitReadyArgs = {
   vaultId: VaultEntity['id'];
-  /** Initial tab to select once data is ready (e.g. Migrate when the vault is migratable). */
   mode: TransactMode;
 };
 

@@ -126,7 +126,6 @@ const transactSlice = createSlice({
         sliceState.inputAmounts = [BIG_ZERO];
         sliceState.inputMaxes = [false];
         sliceState.depositSource = DepositSource.Wallet;
-        // drop the previous mode's quote so the new tab doesn't show a stale one
         resetQuotes(sliceState);
       })
       .addCase(transactSwitchStep, (sliceState, action) => {

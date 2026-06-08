@@ -17,7 +17,6 @@ export const MigrateNotice = memo(function MigrateNotice({
   const { t } = useTranslation();
   const oldVault = useAppSelector(state => selectVaultById(state, oldVaultId));
 
-  // gov cowcentrated wrapper ("-rp") reads as "pool", standard wrapper ("-vault") as "vault"
   const typeNoun = t(
     isCowcentratedGovVault(oldVault) ? 'ReplacementVault-Noun-pool' : 'ReplacementVault-Noun-vault'
   );

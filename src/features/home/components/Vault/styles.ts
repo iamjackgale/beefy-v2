@@ -26,7 +26,6 @@ export const styles = {
     backgroundColor: 'background.vaults.inactive',
   }),
   vaultMigrate: css.raw({
-    // layered over the vault's base backgroundColor; mirrors the figma "gradient tint" overlay
     backgroundImage: '{gradients.migrate}',
     backgroundRepeat: 'no-repeat',
   }),

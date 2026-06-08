@@ -9,7 +9,6 @@ import { FeaturedVaultCard } from '../../../../../home/components/FeaturedVaultC
 import { MigrateActions } from '../MigrateActions/MigrateActions.tsx';
 import { MigrateNotice, MigrateZapNotice } from './MigrateTexts.tsx';
 
-/** Same-chain vault-to-vault (v2v) migration, rendered as the Transact "Migrate" tab. */
 const MigrateFormLoader = memo(function MigrateFormLoader() {
   const vaultId = useAppSelector(selectTransactVaultId);
   const migration = useAppSelector(state => selectVaultReplacementMigration(state, vaultId));

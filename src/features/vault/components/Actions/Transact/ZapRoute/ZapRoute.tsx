@@ -697,11 +697,6 @@ export const ZapRoute = memo(function ZapRoute({
   );
 });
 
-/**
- * Disabled, collapsed placeholder rendered in the same `routeHolder` chrome as {@link ZapRoute}.
- * Shows the "Beefy Zap" title + icon before a real quote has been fetched (used by the migration
- * card so the route slot is visible up-front).
- */
 export type ZapRoutePlaceholderProps = {
   css?: CssStyles;
 };

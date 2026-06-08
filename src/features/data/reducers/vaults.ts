@@ -269,7 +269,6 @@ function getVaultRelations(sliceState: Draft<VaultsState>): VaultsState['relatio
       if (!vault) {
         continue;
       }
-
       const underlyingVaultId = chainSlice.byAddress[vault.depositTokenAddress.toLowerCase()];
       if (!underlyingVaultId) {
         continue;

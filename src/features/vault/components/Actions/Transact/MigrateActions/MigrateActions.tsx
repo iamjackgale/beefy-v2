@@ -70,7 +70,6 @@ export const MigrateActions = memo(function MigrateActions({
   const successClosed = useAppSelector(selectTransactSuccessClosed);
   const confirmNeededWithChanges = useAppSelector(selectTransactConfirmNeededWithChanges);
 
-  // boost-staked shares can't be zapped, so block when nothing is directly held to migrate
   const migratableBalance = useAppSelector(state =>
     selectUserVaultBalanceInShareToken(state, oldVaultId)
   );
@@ -79,7 +78,6 @@ export const MigrateActions = memo(function MigrateActions({
   const [isDisabledByConfirm, setIsDisabledByConfirm] = useState(false);
   const [isDisabledByPriceImpact, setIsDisabledByPriceImpact] = useState(false);
 
-  // options/selection/input are set up at form init, so previewing is just the standard quote
   const fetchQuote = useCallback(() => {
     dispatch(transactFetchQuotes());
   }, [dispatch]);
@@ -114,7 +112,6 @@ export const MigrateActions = memo(function MigrateActions({
     dispatch(transactSetSuccessClosed(false));
     dispatch(transactClearQuotes());
     dispatch(stepperReset());
-    // balance is now zero after migrating, so the Migrate tab will disappear
     dispatch(transactSwitchMode(TransactMode.Deposit));
   }, [dispatch]);
 
