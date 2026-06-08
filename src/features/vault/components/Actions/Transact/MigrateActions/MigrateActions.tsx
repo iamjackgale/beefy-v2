@@ -33,6 +33,8 @@ import {
 import {
   selectTransactConfirmNeededWithChanges,
   selectTransactExecuting,
+  selectTransactInputAmounts,
+  selectTransactOptionsStatus,
   selectTransactQuoteError,
   selectTransactQuoteStatus,
   selectTransactSelectedQuoteOrUndefined,
@@ -74,6 +76,11 @@ export const MigrateActions = memo(function MigrateActions({
     selectUserVaultBalanceInShareToken(state, oldVaultId)
   );
   const hasNothingToMigrate = migratableBalance.isZero();
+
+  const optionsStatus = useAppSelector(selectTransactOptionsStatus);
+  const inputAmounts = useAppSelector(selectTransactInputAmounts);
+  const isReadyToPreview =
+    optionsStatus === TransactStatus.Fulfilled && inputAmounts.some(amount => amount.gt(0));
 
   const [isDisabledByConfirm, setIsDisabledByConfirm] = useState(false);
   const [isDisabledByPriceImpact, setIsDisabledByPriceImpact] = useState(false);
@@ -184,7 +191,7 @@ export const MigrateActions = memo(function MigrateActions({
             variant="cta"
             fullWidth={true}
             borderless={true}
-            disabled={isQuotePending || hasNothingToMigrate}
+            disabled={isQuotePending || !isReadyToPreview}
           >
             {isQuotePending ? t('ReplacementVault-Loading') : t('ReplacementVault-Start')}
           </Button>
