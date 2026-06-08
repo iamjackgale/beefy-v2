@@ -1,10 +1,8 @@
 import type { UnknownAction } from 'redux';
 import { reloadBalanceAndAllowanceAndGovRewardsAndBoostData } from '../actions/tokens.ts';
 import {
-  transactFetchOptions,
   transactInit,
   transactInitReady,
-  transactSetInputAmount,
   transactSwitchMode,
 } from '../actions/transact.ts';
 import { fetchUserOffChainRewardsForVaultAction } from '../actions/user-rewards/user-rewards.ts';
@@ -19,10 +17,7 @@ import {
 import { getV2VRelevantChainsFor } from '../apis/transact/strategies/cross-chain/eligibility.ts';
 import { isVaultActive } from '../entities/vault.ts';
 import { TransactMode, TransactStep } from '../reducers/wallet/transact-types.ts';
-import {
-  selectUserVaultBalanceInShareToken,
-  selectUserVaultBalanceInShareTokenInBoosts,
-} from '../selectors/balance.ts';
+import { selectUserVaultBalanceInShareTokenInBoosts } from '../selectors/balance.ts';
 import { selectBoostById, selectIsVaultPreStakedOrBoosted } from '../selectors/boosts.ts';
 import { selectAllChainIds } from '../selectors/chains.ts';
 import { selectHasBalanceSettledForChainUser } from '../selectors/data-loader/balance.ts';
@@ -162,30 +157,6 @@ export function addTransactListeners() {
           TransactMode.Migrate
         : TransactMode.Deposit;
       dispatch(transactInitReady({ vaultId: action.payload.vaultId, mode: initialMode }));
-    },
-  });
-
-  /**
-   * Migrate has no input field — once its (v2v) options load, prefill the input with the user's full
-   * directly-held old-vault balance so the standard quote flow can run on it.
-   */
-  startAppListening({
-    actionCreator: transactFetchOptions.fulfilled,
-    effect: async (action, { getState, dispatch }) => {
-      if (action.meta.arg.mode !== TransactMode.Migrate) {
-        return;
-      }
-      const state = getState();
-      if (selectTransactMode(state) !== TransactMode.Migrate) return;
-      const oldVaultId = action.meta.arg.vaultId;
-      const walletAddress = selectWalletAddress(state);
-      if (!walletAddress) {
-        return;
-      }
-      const balance = selectUserVaultBalanceInShareToken(state, oldVaultId, walletAddress);
-      if (balance.gt(0)) {
-        dispatch(transactSetInputAmount({ index: 0, amount: balance, max: true }));
-      }
     },
   });
 

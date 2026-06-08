@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from '../../../../../data/store/hooks.
 import {
   transactClearQuotes,
   transactFetchQuotes,
+  transactSetInputAmount,
   transactSetSuccessClosed,
   transactSwitchMode,
 } from '../../../../../data/actions/transact.ts';
@@ -79,8 +80,8 @@ export const MigrateActions = memo(function MigrateActions({
 
   const optionsStatus = useAppSelector(selectTransactOptionsStatus);
   const inputAmounts = useAppSelector(selectTransactInputAmounts);
-  const isReadyToPreview =
-    optionsStatus === TransactStatus.Fulfilled && inputAmounts.some(amount => amount.gt(0));
+  const hasInput = inputAmounts.some(amount => amount.gt(0));
+  const isReadyToPreview = optionsStatus === TransactStatus.Fulfilled && hasInput;
 
   const [isDisabledByConfirm, setIsDisabledByConfirm] = useState(false);
   const [isDisabledByPriceImpact, setIsDisabledByPriceImpact] = useState(false);
@@ -101,6 +102,13 @@ export const MigrateActions = memo(function MigrateActions({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on slippage only
   }, [slippage]);
+
+  // prefill middleware only fires on a fresh fetch; re-fill on remount when options are cached
+  useEffect(() => {
+    if (optionsStatus === TransactStatus.Fulfilled && !hasInput && migratableBalance.gt(0)) {
+      dispatch(transactSetInputAmount({ index: 0, amount: migratableBalance, max: true }));
+    }
+  }, [dispatch, optionsStatus, hasInput, migratableBalance]);
 
   // clear on unmount so deposit/withdraw don't inherit the migrate quote
   useEffect(() => {
