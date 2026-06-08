@@ -203,17 +203,8 @@ const SlippageButton = memo(function SlippageButton({
 
 export type ZapSlippageProps = {
   css?: CssStyles;
-  /**
-   * When false, changing slippage only updates the global slippage value and does NOT dispatch the
-   * transact-form re-quote (used by self-contained consumers like the migration card that own their
-   * own quote lifecycle). Defaults to true (transact form behavior).
-   */
-  refetchTransactQuotes?: boolean;
 };
-export const ZapSlippage = memo(function ZapSlippage({
-  css: cssProp,
-  refetchTransactQuotes = true,
-}: ZapSlippageProps) {
+export const ZapSlippage = memo(function ZapSlippage({ css: cssProp }: ZapSlippageProps) {
   const classes = useStyles();
   const { t } = useTranslation();
   const dispatch = useAppDispatch();
@@ -231,11 +222,9 @@ export const ZapSlippage = memo(function ZapSlippage({
   const handleChange = useCallback<CustomSlippageInputProps['onChange']>(
     value => {
       dispatch(transactSetSlippage({ slippage: value ? value / 100 : DEFAULT_SLIPPAGE }));
-      if (refetchTransactQuotes) {
-        dispatch(transactFetchQuotes());
-      }
+      dispatch(transactFetchQuotes());
     },
-    [dispatch, refetchTransactQuotes]
+    [dispatch]
   );
 
   return (

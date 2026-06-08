@@ -13,7 +13,12 @@ import type {
   TransactOption,
   TransactQuote,
 } from '../apis/transact/transact-types.ts';
-import { isDepositOption, isWithdrawOption } from '../apis/transact/transact-types.ts';
+import {
+  isDepositOption,
+  isVaultSourceDepositOption,
+  isVaultToVaultSingleTokenDepositOption,
+  isWithdrawOption,
+} from '../apis/transact/transact-types.ts';
 import type { ChainEntity } from '../entities/chain.ts';
 import type { TokenEntity } from '../entities/token.ts';
 import { isCowcentratedVault, type VaultEntity } from '../entities/vault.ts';
@@ -38,7 +43,7 @@ import {
   selectTransactSelectionById,
   selectTransactVaultId,
 } from '../selectors/transact.ts';
-import { selectVaultById } from '../selectors/vaults.ts';
+import { selectVaultById, selectVaultReplacementMigration } from '../selectors/vaults.ts';
 import { selectWalletAddress } from '../selectors/wallet.ts';
 import type { BeefyState } from '../store/types.ts';
 import { createAppAsyncThunk } from '../utils/store-utils.ts';
@@ -115,6 +120,8 @@ export type TransactFetchOptionsPayload = {
 const optionsForByMode = {
   [TransactMode.Deposit]: 'fetchDepositOptionsFor',
   [TransactMode.Withdraw]: 'fetchWithdrawOptionsFor',
+  // Migrate is a v2v deposit into the replacement vault, sourced from the page vault.
+  [TransactMode.Migrate]: 'fetchDepositOptionsFor',
 } as const satisfies Partial<Record<TransactMode, keyof ITransactApi>>;
 
 export const transactFetchOptions = createAppAsyncThunk<
@@ -123,19 +130,29 @@ export const transactFetchOptions = createAppAsyncThunk<
 >(
   'transact/fetchOptions',
   async ({ vaultId, mode }, { getState, dispatch }) => {
-    if (
-      mode === TransactMode.Claim ||
-      mode === TransactMode.Boost ||
-      mode === TransactMode.Migrate
-    ) {
-      // these modes have no option-fetching method (Migrate builds its quote directly)
-      throw new Error(`Claim, Boost or Migrate mode not supported.`);
+    if (mode === TransactMode.Claim || mode === TransactMode.Boost) {
+      throw new Error(`Claim or Boost mode not supported.`);
     }
 
     const api = await getTransactApi();
     const state = getState();
     const method = optionsForByMode[mode];
-    const options = await api[method](vaultId, getState);
+
+    let options: TransactOption[];
+    if (mode === TransactMode.Migrate) {
+      // Deposit into the replacement vault, sourced from the page vault: fetch the new vault's
+      // deposit options and keep only the v2v one whose source is the page (old) vault.
+      const migration = selectVaultReplacementMigration(state, vaultId);
+      if (!migration) {
+        throw new Error(`No replacement migration for ${vaultId}`);
+      }
+      const allOptions = await api[method](migration.newVaultId, getState);
+      options = allOptions.filter(
+        o => isVaultToVaultSingleTokenDepositOption(o) && o.srcVaultId === vaultId
+      );
+    } else {
+      options = await api[method](vaultId, getState);
+    }
 
     if (!options || options.length === 0) {
       throw new Error(`No transact options available.`);
@@ -238,8 +255,8 @@ export const transactFetchQuotes = createAppAsyncThunk<
     }
 
     const quoteInputAmounts: InputTokenAmount[] = [];
-    if (mode === TransactMode.Deposit) {
-      // For deposit, user enters number of the selected token(s) to deposit
+    if (mode === TransactMode.Deposit || mode === TransactMode.Migrate) {
+      // Deposit (and Migrate, a v2v deposit) quote the selected token(s) as the input
       selection.tokens.forEach((token, index) => {
         quoteInputAmounts.push({
           token,
@@ -343,7 +360,9 @@ export const transactFetchQuotesIfNeeded = createAppAsyncThunk(
 
       shouldFetch =
         option.chainId !== chainId ||
-        option.vaultId !== vaultId ||
+        // v2v (migrate) options target the replacement vault, not the page vault, so their
+        // vaultId never matches selectionId/inputs already capture any real change
+        (!isVaultSourceDepositOption(option) && option.vaultId !== vaultId) ||
         option.selectionId !== selectionId ||
         !matchingInputs;
     }

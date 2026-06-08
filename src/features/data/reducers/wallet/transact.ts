@@ -32,7 +32,6 @@ import {
   crossChainOpInitiated,
   crossChainOpStatusUpdate,
 } from '../../actions/wallet/cross-chain.ts';
-import { transactFetchMigrationQuote } from '../../actions/migrator-replacement.ts';
 import {
   isCrossChainDepositOption,
   isCrossChainWithdrawOption,
@@ -127,6 +126,8 @@ const transactSlice = createSlice({
         sliceState.inputAmounts = [BIG_ZERO];
         sliceState.inputMaxes = [false];
         sliceState.depositSource = DepositSource.Wallet;
+        // drop the previous mode's quote so the new tab doesn't show a stale one
+        resetQuotes(sliceState);
       })
       .addCase(transactSwitchStep, (sliceState, action) => {
         sliceState.step = action.payload;
@@ -286,33 +287,6 @@ const transactSlice = createSlice({
         }
       })
       .addCase(transactFetchQuotes.fulfilled, (sliceState, action) => {
-        if (sliceState.quotes.requestId === action.meta.requestId) {
-          sliceState.quotes.status = TransactStatus.Fulfilled;
-
-          addQuotesToState(sliceState, action.payload.quotes);
-
-          if (sliceState.selectedQuoteId === undefined) {
-            const firstQuote = first(action.payload.quotes);
-            if (firstQuote) {
-              sliceState.selectedQuoteId = firstQuote.id;
-            }
-          }
-        }
-      })
-      // Migrate quote is built externally but stored in the shared slice (mirrors transactFetchQuotes).
-      .addCase(transactFetchMigrationQuote.pending, (sliceState, action) => {
-        resetQuotes(sliceState);
-        sliceState.quotes.status = TransactStatus.Pending;
-        sliceState.quotes.requestId = action.meta.requestId;
-      })
-      .addCase(transactFetchMigrationQuote.rejected, (sliceState, action) => {
-        if (sliceState.quotes.requestId === action.meta.requestId) {
-          sliceState.quotes.status = TransactStatus.Rejected;
-          sliceState.quotes.error = action.meta.rejectedWithValue ? action.payload : action.error;
-          console.error(sliceState.quotes.error);
-        }
-      })
-      .addCase(transactFetchMigrationQuote.fulfilled, (sliceState, action) => {
         if (sliceState.quotes.requestId === action.meta.requestId) {
           sliceState.quotes.status = TransactStatus.Fulfilled;
 

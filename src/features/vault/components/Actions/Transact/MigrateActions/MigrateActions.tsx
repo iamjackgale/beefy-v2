@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { styled } from '@repo/styles/jsx';
 import { AnimatedButton } from '../../../../../../components/Button/AnimatedButton.tsx';
@@ -6,9 +6,9 @@ import { Button } from '../../../../../../components/Button/Button.tsx';
 import { AlertError } from '../../../../../../components/Alerts/Alerts.tsx';
 import { ExternalLink } from '../../../../../../components/Links/ExternalLink.tsx';
 import { useAppDispatch, useAppSelector } from '../../../../../data/store/hooks.ts';
-import { transactFetchMigrationQuote } from '../../../../../data/actions/migrator-replacement.ts';
 import {
   transactClearQuotes,
+  transactFetchQuotes,
   transactSetSuccessClosed,
   transactSwitchMode,
 } from '../../../../../data/actions/transact.ts';
@@ -36,7 +36,6 @@ import {
   selectTransactQuoteError,
   selectTransactQuoteStatus,
   selectTransactSelectedQuoteOrUndefined,
-  selectTransactSlippage,
   selectTransactSuccessClosed,
 } from '../../../../../data/selectors/transact.ts';
 import { selectVaultById } from '../../../../../data/selectors/vaults.ts';
@@ -63,7 +62,6 @@ export const MigrateActions = memo(function MigrateActions({
   const quote = useAppSelector(selectTransactSelectedQuoteOrUndefined);
   const quoteStatus = useAppSelector(selectTransactQuoteStatus);
   const quoteError = useAppSelector(selectTransactQuoteError);
-  const slippage = useAppSelector(selectTransactSlippage);
   const isStepping = useAppSelector(selectIsStepperStepping);
   const isExecuting = useAppSelector(selectTransactExecuting);
   const stepperContent = useAppSelector(selectStepperStepContent);
@@ -78,20 +76,11 @@ export const MigrateActions = memo(function MigrateActions({
 
   const [isDisabledByConfirm, setIsDisabledByConfirm] = useState(false);
   const [isDisabledByPriceImpact, setIsDisabledByPriceImpact] = useState(false);
-  const requestedRef = useRef(false);
 
+  // options/selection/input are set up at form init, so previewing is just the standard quote
   const fetchQuote = useCallback(() => {
-    requestedRef.current = true;
-    dispatch(transactFetchMigrationQuote({ oldVaultId, newVaultId }));
-  }, [dispatch, oldVaultId, newVaultId]);
-
-  // re-quote when slippage changes, but only after a first preview and not mid-stepper
-  useEffect(() => {
-    if (requestedRef.current && !isStepping && !hasNothingToMigrate) {
-      fetchQuote();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on slippage only
-  }, [slippage]);
+    dispatch(transactFetchQuotes());
+  }, [dispatch]);
 
   // clear on unmount so deposit/withdraw don't inherit the migrate quote
   useEffect(() => {
@@ -110,7 +99,6 @@ export const MigrateActions = memo(function MigrateActions({
     dispatch(transactSetSuccessClosed(false));
     dispatch(transactClearQuotes());
     dispatch(stepperReset());
-    requestedRef.current = false;
     // balance is now zero after migrating, so the Migrate tab will disappear
     dispatch(transactSwitchMode(TransactMode.Deposit));
   }, [dispatch]);
@@ -139,7 +127,7 @@ export const MigrateActions = memo(function MigrateActions({
     return (
       <>
         <ZapRoute quote={quote} expandable={true} />
-        <ZapSlippage refetchTransactQuotes={false} />
+        <ZapSlippage />
         <PriceImpactNotice quote={quote} onChange={setIsDisabledByPriceImpact} />
         <ConfirmNotice onChange={setIsDisabledByConfirm} />
         <ActionsContainer>
