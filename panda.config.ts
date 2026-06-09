@@ -256,6 +256,11 @@ const config = buildConfig(
               'linear-gradient(348.15deg, rgba(255, 255, 255, 0) -166.22%, rgba(255, 255, 255, 0.7) 113.41%), linear-gradient(0deg, #FFD54F, #FFD54F)',
             description: 'tag.boost',
           },
+          migrate: {
+            value:
+              'linear-gradient(270deg, rgba(255, 137, 21, 0.256) 0%, rgba(255, 133, 0, 0) 25%)',
+            description: 'vault card tint for migratable vaults',
+          },
           freeZap: {
             value:
               'linear-gradient(270deg, rgba(59, 152, 176, 0.204) 0%, rgba(39, 127, 154, 0.00) 25%)',
@@ -578,6 +583,10 @@ const config = buildConfig(
             retired: { background: { value: '{colors.tagRetiredBackground}' } },
             paused: { background: { value: '{colors.tagPausedBackground}' } },
             boost: { background: { value: '{gradients.boost}' } },
+            migrate: {
+              background: { value: '{colors.orange.50}' },
+              text: { value: '{colors.darkBlue.90}' },
+            },
             freeZap: {
               background: { value: '{colors.petrol.20}' },
               text: { value: '{colors.darkBlue.90}' },
