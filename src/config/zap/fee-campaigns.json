@@ -5,7 +5,7 @@
     "featured": true,
     "bps": 0,
     "output": {
-      "vault": { "ids": ["pancake-cow-base-sol-usdc-vault"] }
+      "vault": { "ids": ["pancake-cow-base-sol-usdc-vault", "pancake-cow-base-sol-cbbtc-v2-vault"] }
     }
   }
 ]
