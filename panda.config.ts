@@ -261,6 +261,11 @@ const config = buildConfig(
               'linear-gradient(270deg, rgba(255, 137, 21, 0.256) 0%, rgba(255, 133, 0, 0) 25%)',
             description: 'vault card tint for migratable vaults',
           },
+          freeZap: {
+            value:
+              'linear-gradient(270deg, rgba(59, 152, 176, 0.204) 0%, rgba(39, 127, 154, 0.00) 25%)',
+            description: 'vault card tint for free zap vaults',
+          },
         },
         colors: {
           //darkBlue100-64a
@@ -457,6 +462,9 @@ const config = buildConfig(
               '70': { value: '#4C2CDE' },
             },
           },
+          petrol: {
+            '20': { value: '#B7DDE1' },
+          },
         },
         sizes: {
           defaultAssetsImageSize: { value: '48px' },
@@ -524,6 +532,7 @@ const config = buildConfig(
             dark: { value: '{colors.white.70}' },
             black: { value: '{colors.darkBlue.90}' },
             boosted: { value: '{colors.gold.30}' },
+            freeZap: { value: '{colors.petrol.20}' },
             points: { value: '{colors.green.40}' },
             warning: { value: '{colors.orange.40}' },
             disabled: { value: '{colors.darkBlue.90-56a}' },
@@ -576,6 +585,10 @@ const config = buildConfig(
             boost: { background: { value: '{gradients.boost}' } },
             migrate: {
               background: { value: '{colors.orange.50}' },
+              text: { value: '{colors.darkBlue.90}' },
+            },
+            freeZap: {
+              background: { value: '{colors.petrol.20}' },
               text: { value: '{colors.darkBlue.90}' },
             },
             platform: {
@@ -1136,7 +1149,7 @@ const config = buildConfig(
       arbitrum: { primary: '#2d374b', header: '#289fef33' },
       aurora: { primary: '#70d44b', header: 0.2 },
       avax: { primary: '#e74142', header: 0.2 },
-      base: { primary: '#ffffff', header: '#0052ff33' },
+      base: { primary: '#ffffff', header: '#0000ff5e' },
       berachain: { primary: '#814625', header: 1 },
       bsc: { primary: '#f0b90b', header: 0.2 },
       canto: { primary: '#06fc99', header: 0.2 },

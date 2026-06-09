@@ -29,6 +29,10 @@ export const styles = {
     backgroundImage: '{gradients.migrate}',
     backgroundRepeat: 'no-repeat',
   }),
+  vaultFreeZap: css.raw({
+    backgroundImage: '{gradients.freeZap}',
+    backgroundRepeat: 'no-repeat',
+  }),
   vaultInner: css.raw({
     display: 'grid',
     gridTemplateColumns: '1fr',
