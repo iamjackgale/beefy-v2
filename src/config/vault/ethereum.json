@@ -52,7 +52,7 @@
     "createdAt": 1780328838,
     "platformId": "morpho",
     "curatorId": "steakhouse",
-    "assets": ["rUSD"],
+    "assets": ["ethrUSD"],
     "migrationIds": ["morpho"],
     "risks": {
       "complex": false,
