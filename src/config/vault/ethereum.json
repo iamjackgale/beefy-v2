@@ -1,5 +1,41 @@
 [
   {
+    "id": "aavev4-ethereum-frxusd",
+    "name": "frxUSD",
+    "type": "standard",
+    "token": "frxUSD",
+    "tokenAddress": "0xCAcd6fd266aF91b8AeD52aCCc382b4e165586E29",
+    "tokenDecimals": 18,
+    "earnContractAddress": "0x59e3460c619D1484B73A4d08fe83834dF0E9a860",
+    "earnedToken": "mooAaveV4CorefrxUSD",
+    "earnedTokenAddress": "0x59e3460c619D1484B73A4d08fe83834dF0E9a860",
+    "oracle": "tokens",
+    "oracleId": "frxUSD",
+    "status": "active",
+    "createdAt": 1781618039,
+    "platformId": "aave-v4",
+    "assets": ["frxUSD"],
+    "migrationIds": [],
+    "risks": {
+      "complex": false,
+      "curated": false,
+      "notAudited": false,
+      "notBattleTested": true,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "lendingNoBorrow",
+    "underlyingPlatformUrl": "https://pro.aave.com/explore/asset/1/0xCAcd6fd266aF91b8AeD52aCCc382b4e165586E29",
+    "network": "ethereum",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
     "id": "stakedao-usg-sdola",
     "name": "USG/sDOLA",
     "type": "standard",
