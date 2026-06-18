@@ -1,5 +1,44 @@
 [
   {
+    "id": "aerodrome-virtual-deus",
+    "name": "DEUS-VIRTUAL vLP",
+    "type": "standard",
+    "token": "vAMM-DEUS-VIRTUAL",
+    "tokenAddress": "0x3e97c5ec8c73e7d566aca606472141a9b9a8c1fa",
+    "tokenDecimals": 18,
+    "tokenProviderId": "aerodrome",
+    "earnContractAddress": "0xAcbfECd3e1aA7C025E99167CAa4807512AD4B78a",
+    "earnedToken": "mooAerodromeBaseDEUS-VIRTUAL",
+    "earnedTokenAddress": "0xAcbfECd3e1aA7C025E99167CAa4807512AD4B78a",
+    "oracle": "lps",
+    "oracleId": "aerodrome-virtual-deus",
+    "status": "active",
+    "createdAt": 1781797610,
+    "platformId": "aerodrome",
+    "assets": ["DEUS2", "VIRTUAL"],
+    "risks": {
+      "updatedAt": 1781797610,
+      "complex": false,
+      "curated": false,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": true,
+      "notTimelocked": true,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "lp",
+    "addLiquidityUrl": "https://aerodrome.finance/deposit?token0=0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b&token1=0x940A319B75861014A220D9c6c144d108552B089B&type=-1&chain0=8453&chain1=8453&factory=0x420DD381b31aEf6683db6B902084cB0FFECe40Da",
+    "removeLiquidityUrl": "https://aerodrome.finance/withdraw",
+    "network": "base",
+    "zaps": [
+      {
+        "strategyId": "solidly",
+        "ammId": "base-aerodrome"
+      }
+    ]
+  },
+  {
     "id": "pancakeswap-cow-base-sol-jitosol-vault",
     "name": "JitoSOL-SOL",
     "type": "standard",
