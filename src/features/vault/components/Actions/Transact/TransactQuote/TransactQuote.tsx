@@ -1,9 +1,9 @@
 import { css, type CssStyles } from '@repo/styles/css';
 import type BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { memo, useEffect, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AlertError } from '../../../../../../components/Alerts/Alerts.tsx';
+import { AlertError, AlertWarning } from '../../../../../../components/Alerts/Alerts.tsx';
 import { BIG_ZERO } from '../../../../../../helpers/big-number.ts';
 import { legacyMakeStyles } from '../../../../../../helpers/mui.ts';
 import { useAppDispatch, useAppSelector } from '../../../../../data/store/hooks.ts';
@@ -53,6 +53,8 @@ import { styles } from './styles.ts';
 import { ExternalLink } from '../../../../../../components/Links/ExternalLink.tsx';
 
 const useStyles = legacyMakeStyles(styles);
+const NOT_CALM_REFRESH_SECONDS = 10;
+const NOT_CALM_SUCCESS_LOADING_MS = 600;
 
 export type TransactQuoteProps = {
   title: string;
@@ -70,8 +72,29 @@ export const TransactQuote = memo(function TransactQuote({
   const inputMaxes = useAppSelector(selectTransactInputMaxes);
   const chainId = useAppSelector(selectTransactSelectedChainId);
   const status = useAppSelector(selectTransactQuoteStatus);
+  const quoteError = useAppSelector(selectTransactQuoteError);
   const preflightOk = useAppSelector(selectTransactCrossChainPreflight);
   const slippage = useAppSelector(selectTransactSlippage);
+  const isNotCalmDepositError =
+    !!quoteError &&
+    QuoteCowcentratedNotCalmError.match(quoteError) &&
+    quoteError.action === 'deposit';
+  const [notCalmAutoRefresh, setNotCalmAutoRefresh] = useState(false);
+  const [stickyNotCalmWarning, setStickyNotCalmWarning] = useState(false);
+  const [notCalmRefreshSeconds, setNotCalmRefreshSeconds] = useState(NOT_CALM_REFRESH_SECONDS);
+  const [notCalmRefreshSpinning, setNotCalmRefreshSpinning] = useState(false);
+  const [notCalmSuccessLoading, setNotCalmSuccessLoading] = useState(false);
+  const notCalmRefreshTimeout = useRef<number | undefined>(undefined);
+  const notCalmSuccessLoadingTimeout = useRef<number | undefined>(undefined);
+  const showNotCalmSuccessLoading =
+    status === TransactStatus.Fulfilled && (stickyNotCalmWarning || notCalmSuccessLoading);
+  const showStickyNotCalmWarning = status === TransactStatus.Pending && stickyNotCalmWarning;
+  const showNotCalmWarning = isNotCalmDepositError || showStickyNotCalmWarning;
+  const showNotCalmRefresh = notCalmAutoRefresh && !showNotCalmSuccessLoading;
+  const inputIsZero = useMemo(
+    () => inputAmounts.every(amount => amount.lte(BIG_ZERO)),
+    [inputAmounts]
+  );
   const debouncedFetchQuotes = useMemo(
     () =>
       debounce(
@@ -109,6 +132,7 @@ export const TransactQuote = memo(function TransactQuote({
 
   // slippage isn't part of the if-needed change check, so force a re-quote when it changes
   const skipInitialSlippageRequote = useRef(true);
+  const skipInitialNotCalmReset = useRef(true);
   useEffect(() => {
     if (skipInitialSlippageRequote.current) {
       skipInitialSlippageRequote.current = false;
@@ -121,6 +145,108 @@ export const TransactQuote = memo(function TransactQuote({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on slippage only
   }, [slippage]);
 
+  const handleNotCalmRefresh = useCallback(() => {
+    setNotCalmAutoRefresh(true);
+    setNotCalmRefreshSeconds(0);
+    setNotCalmRefreshSpinning(true);
+
+    if (!inputIsZero && preflightOk && status !== TransactStatus.Pending) {
+      dispatch(transactFetchQuotes());
+    }
+
+    if (notCalmRefreshTimeout.current !== undefined) {
+      window.clearTimeout(notCalmRefreshTimeout.current);
+    }
+    notCalmRefreshTimeout.current = window.setTimeout(() => {
+      setNotCalmRefreshSpinning(false);
+      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
+      notCalmRefreshTimeout.current = undefined;
+    }, 600);
+  }, [dispatch, inputIsZero, preflightOk, status]);
+
+  useEffect(() => {
+    if (isNotCalmDepositError) {
+      setNotCalmAutoRefresh(true);
+      setStickyNotCalmWarning(true);
+      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
+      setNotCalmSuccessLoading(false);
+    } else if (status === TransactStatus.Fulfilled) {
+      if (stickyNotCalmWarning && notCalmSuccessLoadingTimeout.current === undefined) {
+        setNotCalmSuccessLoading(true);
+        notCalmSuccessLoadingTimeout.current = window.setTimeout(() => {
+          setNotCalmSuccessLoading(false);
+          notCalmSuccessLoadingTimeout.current = undefined;
+        }, NOT_CALM_SUCCESS_LOADING_MS);
+      }
+      setNotCalmAutoRefresh(false);
+      setNotCalmRefreshSpinning(false);
+      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
+      setStickyNotCalmWarning(false);
+      if (notCalmRefreshTimeout.current !== undefined) {
+        window.clearTimeout(notCalmRefreshTimeout.current);
+        notCalmRefreshTimeout.current = undefined;
+      }
+    } else if (
+      status === TransactStatus.Idle ||
+      (status === TransactStatus.Rejected && quoteError)
+    ) {
+      setNotCalmAutoRefresh(false);
+      setNotCalmRefreshSpinning(false);
+      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
+      setStickyNotCalmWarning(false);
+      setNotCalmSuccessLoading(false);
+      if (notCalmRefreshTimeout.current !== undefined) {
+        window.clearTimeout(notCalmRefreshTimeout.current);
+        notCalmRefreshTimeout.current = undefined;
+      }
+    }
+  }, [isNotCalmDepositError, quoteError, status, stickyNotCalmWarning]);
+
+  useEffect(() => {
+    if (skipInitialNotCalmReset.current) {
+      skipInitialNotCalmReset.current = false;
+      return;
+    }
+
+    setStickyNotCalmWarning(false);
+    setNotCalmAutoRefresh(false);
+    setNotCalmRefreshSpinning(false);
+    setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
+    setNotCalmSuccessLoading(false);
+    if (notCalmRefreshTimeout.current !== undefined) {
+      window.clearTimeout(notCalmRefreshTimeout.current);
+      notCalmRefreshTimeout.current = undefined;
+    }
+  }, [chainId, inputAmounts, inputMaxes, mode, selection, selectionId]);
+
+  useEffect(() => {
+    if (!notCalmAutoRefresh || notCalmRefreshSpinning) {
+      return;
+    }
+
+    if (notCalmRefreshSeconds <= 0) {
+      handleNotCalmRefresh();
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setNotCalmRefreshSeconds(seconds => Math.max(seconds - 1, 0));
+    }, 1000);
+
+    return () => window.clearTimeout(timeout);
+  }, [handleNotCalmRefresh, notCalmAutoRefresh, notCalmRefreshSeconds, notCalmRefreshSpinning]);
+
+  useEffect(() => {
+    return () => {
+      if (notCalmRefreshTimeout.current !== undefined) {
+        window.clearTimeout(notCalmRefreshTimeout.current);
+      }
+      if (notCalmSuccessLoadingTimeout.current !== undefined) {
+        window.clearTimeout(notCalmSuccessLoadingTimeout.current);
+      }
+    };
+  }, []);
+
   if (status === TransactStatus.Idle) {
     return <QuoteIdle title={title} css={cssProp} />;
   }
@@ -129,16 +255,26 @@ export const TransactQuote = memo(function TransactQuote({
     <div className={css(cssProp)}>
       <QuoteTitleRefresh
         title={title}
-        enableRefresh={status === TransactStatus.Fulfilled || status === TransactStatus.Rejected}
+        enableRefresh={
+          status === TransactStatus.Fulfilled ||
+          status === TransactStatus.Rejected ||
+          showNotCalmWarning
+        }
+        onRefresh={showNotCalmRefresh ? handleNotCalmRefresh : undefined}
+        refreshCountdown={showNotCalmRefresh ? notCalmRefreshSeconds : undefined}
+        refreshSpinning={showNotCalmRefresh && notCalmRefreshSpinning}
       />
-      {status === TransactStatus.Pending ?
+      {(
+        (status === TransactStatus.Pending && !showStickyNotCalmWarning) ||
+        showNotCalmSuccessLoading
+      ) ?
         <QuoteLoading />
       : null}
-      {status === TransactStatus.Fulfilled ?
+      {status === TransactStatus.Fulfilled && !showNotCalmSuccessLoading ?
         <QuoteLoaded />
       : null}
-      {status === TransactStatus.Rejected ?
-        <QuoteError />
+      {status === TransactStatus.Rejected || showStickyNotCalmWarning ?
+        <QuoteError showNotCalmDeposit={showStickyNotCalmWarning} />
       : null}
     </div>
   );
@@ -178,11 +314,37 @@ const QuoteIdle = memo(function QuoteIdle({ title, css: cssProp }: TransactQuote
   );
 });
 
-const QuoteError = memo(function QuoteError() {
+type QuoteErrorProps = {
+  showNotCalmDeposit?: boolean;
+};
+
+const QuoteError = memo(function QuoteError({ showNotCalmDeposit = false }: QuoteErrorProps) {
   const classes = useStyles();
   const { t } = useTranslation();
   const error = useAppSelector(selectTransactQuoteError);
   const mode = useAppSelector(selectTransactMode);
+
+  if (
+    showNotCalmDeposit ||
+    (error && QuoteCowcentratedNotCalmError.match(error) && error.action === 'deposit')
+  ) {
+    return (
+      <AlertWarning>
+        <Trans
+          t={t}
+          i18nKey="Transact-Quote-Error-Calm-deposit"
+          components={{
+            LinkCalm: (
+              <ExternalLink
+                className={classes.link}
+                href={'https://docs.beefy.finance/beefy-products/clm#calmness-check'}
+              />
+            ),
+          }}
+        />
+      </AlertWarning>
+    );
+  }
 
   if (error) {
     if (CrossChainBridgeBelowFeeError.match(error)) {

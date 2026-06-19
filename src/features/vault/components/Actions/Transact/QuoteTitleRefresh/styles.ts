@@ -33,4 +33,19 @@ export const styles = {
     fill: 'green.40',
     position: 'relative',
   }),
+  refreshIconSpin: css.raw({
+    animation: 'rotate 600ms linear 1',
+  }),
+  refreshCountdown: css.raw({
+    position: 'absolute',
+    inset: '0',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'green.40',
+    fontSize: '7.5px',
+    fontWeight: '700',
+    lineHeight: '1',
+    pointerEvents: 'none',
+  }),
 };
