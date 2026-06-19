@@ -1,5 +1,79 @@
 [
   {
+    "id": "morpho-v2-ethereum-clearstar-3jane-ecosystem-vault-usdc",
+    "name": "USDC (Clearstar, 3Jane Ecosystem Vault V2)",
+    "type": "standard",
+    "token": "USDC",
+    "tokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "tokenDecimals": 6,
+    "earnContractAddress": "0x5e293d57f13269Cf40729042356C30B083c1ac29",
+    "earnedToken": "mooMorphoV2EthereumClearstar3JaneEcosystemVaultUSDC",
+    "earnedTokenAddress": "0x5e293d57f13269Cf40729042356C30B083c1ac29",
+    "oracle": "tokens",
+    "oracleId": "USDC",
+    "status": "active",
+    "createdAt": 1781850822,
+    "platformId": "morpho",
+    "curatorId": "clearstar",
+    "assets": ["USDC"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/ethereum/vault/0xe05faDf242331808f504661BEA65972594869826/clearstar-3jane-ecosystem-vault-usdc",
+    "network": "ethereum",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
+    "id": "morpho-v2-ethereum-hyperithm-apex-cbbtc",
+    "name": "cbBTC (Hyperithm, Apex V2)",
+    "type": "standard",
+    "token": "cbBTC",
+    "tokenAddress": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+    "tokenDecimals": 8,
+    "earnContractAddress": "0x12C2f6Fb09f195B7cc84fE4402a2cad3ed3c67DB",
+    "earnedToken": "mooMorphoV2EthereumHyperithmApexcbBTC",
+    "earnedTokenAddress": "0x12C2f6Fb09f195B7cc84fE4402a2cad3ed3c67DB",
+    "oracle": "tokens",
+    "oracleId": "cbBTC",
+    "status": "active",
+    "createdAt": 1781850378,
+    "platformId": "morpho",
+    "curatorId": "hyperithm",
+    "assets": ["cbBTC"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/ethereum/vault/0xCdbe4A5B5bAd2BC04492052Df2F881B5727d034d/hyperithm-apex-cbbtc",
+    "network": "ethereum",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
     "id": "stakedao-mim-2pool",
     "name": "MIM/USDC/USDT",
     "type": "standard",
