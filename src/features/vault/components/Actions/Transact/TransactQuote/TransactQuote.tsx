@@ -262,7 +262,7 @@ export const TransactQuote = memo(function TransactQuote({
           showNotCalmWarning
         }
         onRefresh={showNotCalmRefresh ? handleNotCalmRefresh : undefined}
-        autoRefresh={showNotCalmWarning}
+        autoRefresh={true}
         autoRefreshSeconds={NOT_CALM_REFRESH_SECONDS}
       />
       {(
@@ -291,7 +291,7 @@ const QuoteIdle = memo(function QuoteIdle({ title, css: cssProp }: TransactQuote
       <QuoteTitleRefresh
         title={title}
         enableRefresh={true}
-        autoRefresh={true}
+        autoRefresh={false}
         autoRefreshSeconds={NOT_CALM_REFRESH_SECONDS}
       />
       <div className={classes.tokenAmounts}>

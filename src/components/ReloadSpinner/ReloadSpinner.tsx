@@ -5,10 +5,6 @@ import { memo, useCallback, useEffect, useState, type CSSProperties } from 'reac
 const DEFAULT_AUTO_REFRESH_SECONDS = 10;
 const REFRESH_SPIN_MS = 600;
 
-// Refresh glyph paths (from images/icons/refresh.svg, viewBox 0 0 20 20).
-// SOLID = the always-on arrow + top arc. DASHES = the bottom dashes in layout order, from
-// the solid arc's tail (lower-left) clockwise toward the arrowhead. They disable in reverse:
-// the dash nearest the arrowhead goes first, the tail dash (DASHES[0]) goes last.
 const SOLID =
   'M16.6758 9.14062H10.8594L13.5352 6.46484C12.6377 5.55912 11.4077 4.9854 10.0283 4.98535C7.52288 4.98535 5.44522 6.84057 5.09473 9.25H3.42773C3.78625 5.91693 6.5993 3.32422 10.0283 3.32422C11.8647 3.32427 13.5188 4.07149 14.7236 5.27637L16.6758 3.32422V9.14062Z';
 const DASHES = [
@@ -49,18 +45,17 @@ export const ReloadSpinner = memo(function ReloadSpinner({
       return;
     }
 
-    const stepMs = (autoRefreshSeconds * 1000) / DASHES.length;
+    // split the duration into (dash count + 1) steps: one disables each dash, the last triggers
+    // the spin (e.g. 10s / 5 → disable a dash at 2s, 4s, 6s, 8s; spin at 10s)
+    const totalMs = autoRefreshSeconds * 1000;
+    const stepMs = totalMs / (DASHES.length + 1);
     const timers: number[] = [];
     setDisabledCount(0);
     for (let i = 1; i <= DASHES.length; i++) {
       timers.push(window.setTimeout(() => setDisabledCount(i), stepMs * i));
     }
-    timers.push(
-      window.setTimeout(() => {
-        setSpinning(true);
-        setCycleNonce(n => n + 1);
-      }, stepMs * DASHES.length)
-    );
+    timers.push(window.setTimeout(() => setSpinning(true), totalMs));
+    timers.push(window.setTimeout(() => setCycleNonce(n => n + 1), totalMs + REFRESH_SPIN_MS));
 
     return () => timers.forEach(window.clearTimeout);
   }, [autoRefresh, autoRefreshSeconds, cycleNonce]);
