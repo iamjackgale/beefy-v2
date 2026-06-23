@@ -45,6 +45,7 @@ import {
   selectTransactVaultId,
 } from '../../../../../data/selectors/transact.ts';
 import { selectVaultById } from '../../../../../data/selectors/vaults.ts';
+import { selectIsWindowFocused } from '../../../../../data/selectors/window.ts';
 import { QuoteTitleRefresh } from '../QuoteTitleRefresh/QuoteTitleRefresh.tsx';
 import { TokenAmountIcon, TokenAmountIconLoader } from '../TokenAmountIcon/TokenAmountIcon.tsx';
 import { ZapRoute } from '../ZapRoute/ZapRoute.tsx';
@@ -75,6 +76,7 @@ export const TransactQuote = memo(function TransactQuote({
   const quoteError = useAppSelector(selectTransactQuoteError);
   const preflightOk = useAppSelector(selectTransactCrossChainPreflight);
   const slippage = useAppSelector(selectTransactSlippage);
+  const isWindowFocused = useAppSelector(selectIsWindowFocused);
   const isNotCalmDepositError =
     !!quoteError &&
     QuoteCowcentratedNotCalmError.match(quoteError) &&
@@ -220,7 +222,9 @@ export const TransactQuote = memo(function TransactQuote({
   }, [chainId, inputAmounts, inputMaxes, mode, selection, selectionId]);
 
   useEffect(() => {
-    if (!notCalmAutoRefresh || notCalmRefreshSpinning) {
+    // pause the auto-refresh while the tab is in the background so we don't keep re-quoting the
+    // zap api unattended; it resumes from the same countdown value when the tab is focused again
+    if (!notCalmAutoRefresh || notCalmRefreshSpinning || !isWindowFocused) {
       return;
     }
 
@@ -234,7 +238,13 @@ export const TransactQuote = memo(function TransactQuote({
     }, 1000);
 
     return () => window.clearTimeout(timeout);
-  }, [handleNotCalmRefresh, notCalmAutoRefresh, notCalmRefreshSeconds, notCalmRefreshSpinning]);
+  }, [
+    handleNotCalmRefresh,
+    notCalmAutoRefresh,
+    notCalmRefreshSeconds,
+    notCalmRefreshSpinning,
+    isWindowFocused,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -262,7 +272,7 @@ export const TransactQuote = memo(function TransactQuote({
           showNotCalmWarning
         }
         onRefresh={showNotCalmRefresh ? handleNotCalmRefresh : undefined}
-        autoRefresh={true}
+        autoRefresh={showNotCalmRefresh}
         autoRefreshSeconds={NOT_CALM_REFRESH_SECONDS}
       />
       {(

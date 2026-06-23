@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
 import { useStore } from 'react-redux';
 import { persistStore } from 'redux-persist';
 import { setGlobalDevModeChecks } from 'reselect';
@@ -6,6 +7,7 @@ import { initAppData } from '../actions/scenarios.ts';
 import { listenerMiddleware } from '../middlewares/listener-middleware.ts';
 import { addListeners } from '../middlewares/listener-setup.ts';
 import { rootReducer } from '../reducers/reducers.ts';
+import { setWindowFocused } from '../reducers/window.ts';
 
 export const store = configureStore({
   reducer: rootReducer,
@@ -21,6 +23,22 @@ export const store = configureStore({
 
 // listeners get added after store is created otherwise there is a type-loop
 addListeners();
+
+// track tab focus/visibility so focus-gated work (e.g. the not-calm quote auto-refresh) can pause
+// in background tabs and avoid hammering APIs. Uses RTK's setupListeners focus/visibility wiring.
+setupListeners(store.dispatch, dispatch => {
+  const sync = () =>
+    dispatch(setWindowFocused(document.visibilityState === 'visible' && document.hasFocus()));
+  window.addEventListener('focus', sync, false);
+  window.addEventListener('blur', sync, false);
+  document.addEventListener('visibilitychange', sync, false);
+  sync();
+  return () => {
+    window.removeEventListener('focus', sync);
+    window.removeEventListener('blur', sync);
+    document.removeEventListener('visibilitychange', sync);
+  };
+});
 
 // start loading global data ASAP
 store.dispatch(initAppData);
