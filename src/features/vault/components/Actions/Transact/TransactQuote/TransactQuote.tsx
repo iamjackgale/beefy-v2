@@ -256,13 +256,14 @@ export const TransactQuote = memo(function TransactQuote({
       <QuoteTitleRefresh
         title={title}
         enableRefresh={
+          status === TransactStatus.Pending ||
           status === TransactStatus.Fulfilled ||
           status === TransactStatus.Rejected ||
           showNotCalmWarning
         }
         onRefresh={showNotCalmRefresh ? handleNotCalmRefresh : undefined}
-        refreshCountdown={showNotCalmRefresh ? notCalmRefreshSeconds : undefined}
-        refreshSpinning={showNotCalmRefresh && notCalmRefreshSpinning}
+        autoRefresh={showNotCalmWarning}
+        autoRefreshSeconds={NOT_CALM_REFRESH_SECONDS}
       />
       {(
         (status === TransactStatus.Pending && !showStickyNotCalmWarning) ||
@@ -287,7 +288,12 @@ const QuoteIdle = memo(function QuoteIdle({ title, css: cssProp }: TransactQuote
 
   return (
     <div className={css(styles.disabled, cssProp)}>
-      <QuoteTitleRefresh title={title} enableRefresh={true} />
+      <QuoteTitleRefresh
+        title={title}
+        enableRefresh={true}
+        autoRefresh={true}
+        autoRefreshSeconds={NOT_CALM_REFRESH_SECONDS}
+      />
       <div className={classes.tokenAmounts}>
         {isCowcentratedLikeVault(vault) ?
           <div className={classes.amountReturned}>

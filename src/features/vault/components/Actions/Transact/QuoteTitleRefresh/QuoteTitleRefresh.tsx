@@ -1,30 +1,26 @@
-import { css, cx, type CssStyles } from '@repo/styles/css';
+import { type CssStyles } from '@repo/styles/css';
 import { memo, useCallback } from 'react';
-import { legacyMakeStyles } from '../../../../../../helpers/mui.ts';
+import { ReloadSpinner } from '../../../../../../components/ReloadSpinner/ReloadSpinner.tsx';
 import { useAppDispatch } from '../../../../../data/store/hooks.ts';
-import Refresh from '../../../../../../images/icons/mui/Refresh.svg?react';
 import { transactFetchQuotes } from '../../../../../data/actions/transact.ts';
-import { styles } from './styles.ts';
-
-const useStyles = legacyMakeStyles(styles);
+import { styled } from '@repo/styles/jsx';
 
 export type QuoteTitleRefreshProps = {
   title: string;
   enableRefresh?: boolean;
-  refreshCountdown?: number;
-  refreshSpinning?: boolean;
+  autoRefresh?: boolean;
+  autoRefreshSeconds?: number;
   onRefresh?: () => void;
   css?: CssStyles;
 };
 export const QuoteTitleRefresh = memo(function QuoteTitleRefresh({
   title,
   enableRefresh = false,
-  refreshCountdown,
-  refreshSpinning = false,
+  autoRefresh = false,
+  autoRefreshSeconds,
   onRefresh,
   css: cssProp,
 }: QuoteTitleRefreshProps) {
-  const classes = useStyles();
   const dispatch = useAppDispatch();
   const handleRefresh = useCallback(() => {
     if (onRefresh) {
@@ -36,18 +32,30 @@ export const QuoteTitleRefresh = memo(function QuoteTitleRefresh({
   }, [dispatch, onRefresh]);
 
   return (
-    <div className={css(styles.holder, cssProp)}>
-      <div className={classes.title}>{title}</div>
+    <Holder css={cssProp}>
+      <Title>{title}</Title>
       {enableRefresh ?
-        <button type="button" className={classes.refreshButton} onClick={handleRefresh}>
-          <Refresh
-            className={cx(classes.refreshIcon, refreshSpinning && classes.refreshIconSpin)}
-          />
-          {refreshCountdown !== undefined ?
-            <span className={classes.refreshCountdown}>{refreshCountdown}</span>
-          : null}
-        </button>
+        <ReloadSpinner
+          autoRefresh={autoRefresh}
+          autoRefreshSeconds={autoRefreshSeconds}
+          onClick={handleRefresh}
+        />
       : null}
-    </div>
+    </Holder>
   );
+});
+
+const Holder = styled('div', {
+  base: {
+    display: 'flex',
+    gap: '16px',
+    marginBottom: '8px',
+  },
+});
+
+const Title = styled('div', {
+  base: {
+    textStyle: 'body',
+    color: 'text.dark',
+  },
 });
