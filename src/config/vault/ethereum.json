@@ -1135,8 +1135,10 @@
     "earnedTokenAddress": "0xe104c229b7b2e3A68305F5a66039abF6e308Fac8",
     "oracle": "lps",
     "oracleId": "pendle-apyusd-18jun26",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1774520043,
+    "retireReason": "rewards",
+    "retiredAt": 1782295515,
     "platformId": "pendle",
     "assets": ["apyUSD"],
     "migrationIds": [],
@@ -1151,9 +1153,9 @@
       "synthAsset": false
     },
     "strategyTypeId": "multi-lp",
-    "pointStructureIds": ["apyx"],
     "addLiquidityUrl": "https://app.pendle.finance/trade/pools/0x3C53faE231ad3c0408A8b6D33138bBFf1cAeC330/zap/in?chain=ethereum",
     "removeLiquidityUrl": "https://app.pendle.finance/trade/pools/0x3C53faE231ad3c0408A8b6D33138bBFf1cAeC330/zap/out?chain=ethereum",
+    "pointStructureIds": ["apyx"],
     "network": "ethereum"
   },
   {
@@ -1169,8 +1171,10 @@
     "earnedTokenAddress": "0x821bB901bAdbd2A6aFE4DD7D0480f7758284690e",
     "oracle": "lps",
     "oracleId": "pendle-apxusd-18jun26",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1774520034,
+    "retireReason": "rewards",
+    "retiredAt": 1782295515,
     "platformId": "pendle",
     "assets": ["apxUSD"],
     "migrationIds": [],
@@ -1185,9 +1189,9 @@
       "synthAsset": false
     },
     "strategyTypeId": "multi-lp",
-    "pointStructureIds": ["apyx"],
     "addLiquidityUrl": "https://app.pendle.finance/trade/pools/0x50DCE085af29CABa28f7308beA57C4043757b491/zap/in?chain=ethereum",
     "removeLiquidityUrl": "https://app.pendle.finance/trade/pools/0x50DCE085af29CABa28f7308beA57C4043757b491/zap/out?chain=ethereum",
+    "pointStructureIds": ["apyx"],
     "network": "ethereum"
   },
   {
@@ -1614,8 +1618,10 @@
     "earnedTokenAddress": "0x81289970e7D567098Af3386E8CbA5DCCA356a223",
     "oracle": "lps",
     "oracleId": "pendle-susdf-18jun26",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1770197125,
+    "retireReason": "rewards",
+    "retiredAt": 1782295515,
     "platformId": "pendle",
     "assets": ["sUSDf"],
     "migrationIds": [],
@@ -1630,9 +1636,9 @@
       "synthAsset": false
     },
     "strategyTypeId": "multi-lp",
-    "pointStructureIds": ["falcon-miles"],
     "addLiquidityUrl": "https://app.pendle.finance/trade/pools/0x42826337a249b3162d133F65D8f79b4A22E82f45/zap/in?chain=ethereum",
     "removeLiquidityUrl": "https://app.pendle.finance/trade/pools/0x42826337a249b3162d133F65D8f79b4A22E82f45/zap/out?chain=ethereum",
+    "pointStructureIds": ["falcon-miles"],
     "network": "ethereum"
   },
   {
@@ -4850,8 +4856,10 @@
     "earnedTokenAddress": "0x63a936Cc9740126f21eC8144aCfF22C2Ff89149c",
     "oracle": "tokens",
     "oracleId": "wstETH",
-    "status": "active",
+    "status": "paused",
     "createdAt": 1738747669,
+    "pausedAt": 1781870837,
+    "pauseReason": "liquidityPanic",
     "platformId": "morpho",
     "curatorId": "steakhouse",
     "assets": ["wstETH"],
