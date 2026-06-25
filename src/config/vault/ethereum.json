@@ -49,7 +49,8 @@
     "status": "active",
     "createdAt": 1782299143,
     "platformId": "pendle",
-    "assets": ["reUSD"],
+    "assets": ["reUSDxyz"],
+    "icons": ["reUSDxyz"],
     "pointStructureIds": ["re.xyz", "ethena"],
     "migrationIds": [],
     "risks": {
