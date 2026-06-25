@@ -1,5 +1,42 @@
 [
   {
+    "id": "morpho-v2-ethereum-clearstar-3jane-ecosystem-vault-usdc",
+    "name": "USDC (Clearstar, 3Jane Ecosystem Vault V2)",
+    "type": "standard",
+    "token": "USDC",
+    "tokenAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "tokenDecimals": 6,
+    "earnContractAddress": "0x5e293d57f13269Cf40729042356C30B083c1ac29",
+    "earnedToken": "mooMorphoV2EthereumClearstar3JaneEcosystemVaultUSDC",
+    "earnedTokenAddress": "0x5e293d57f13269Cf40729042356C30B083c1ac29",
+    "oracle": "tokens",
+    "oracleId": "USDC",
+    "status": "active",
+    "createdAt": 1782372149,
+    "platformId": "morpho",
+    "curatorId": "clearstar",
+    "assets": ["USDC"],
+    "migrationIds": ["morpho"],
+    "risks": {
+      "complex": false,
+      "curated": true,
+      "notAudited": false,
+      "notBattleTested": false,
+      "notCorrelated": false,
+      "notTimelocked": false,
+      "notVerified": false,
+      "synthAsset": false
+    },
+    "strategyTypeId": "single",
+    "underlyingPlatformUrl": "https://app.morpho.org/ethereum/vault/0xe05faDf242331808f504661BEA65972594869826/clearstar-3jane-ecosystem-vault-usdc",
+    "network": "ethereum",
+    "zaps": [
+      {
+        "strategyId": "single"
+      }
+    ]
+  },
+  {
     "id": "stakedao-vusd-crvusd",
     "name": "VUSD/crvUSD",
     "type": "standard",
