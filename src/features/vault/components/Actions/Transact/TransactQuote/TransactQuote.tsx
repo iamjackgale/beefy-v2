@@ -1,7 +1,7 @@
 import { css, type CssStyles } from '@repo/styles/css';
 import type BigNumber from 'bignumber.js';
 import { debounce } from 'lodash-es';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AlertError, AlertWarning } from '../../../../../../components/Alerts/Alerts.tsx';
 import { BIG_ZERO } from '../../../../../../helpers/big-number.ts';
@@ -45,17 +45,15 @@ import {
   selectTransactVaultId,
 } from '../../../../../data/selectors/transact.ts';
 import { selectVaultById } from '../../../../../data/selectors/vaults.ts';
-import { selectIsWindowFocused } from '../../../../../data/selectors/window.ts';
 import { QuoteTitleRefresh } from '../QuoteTitleRefresh/QuoteTitleRefresh.tsx';
 import { TokenAmountIcon, TokenAmountIconLoader } from '../TokenAmountIcon/TokenAmountIcon.tsx';
 import { ZapRoute } from '../ZapRoute/ZapRoute.tsx';
 import { ZapSlippage } from '../ZapSlippage/ZapSlippage.tsx';
+import { NOT_CALM_REFRESH_SECONDS, useNotCalmAutoRefresh } from '../hooks/useNotCalmAutoRefresh.ts';
 import { styles } from './styles.ts';
 import { ExternalLink } from '../../../../../../components/Links/ExternalLink.tsx';
 
 const useStyles = legacyMakeStyles(styles);
-const NOT_CALM_REFRESH_SECONDS = 10;
-const NOT_CALM_SUCCESS_LOADING_MS = 600;
 
 export type TransactQuoteProps = {
   title: string;
@@ -73,30 +71,14 @@ export const TransactQuote = memo(function TransactQuote({
   const inputMaxes = useAppSelector(selectTransactInputMaxes);
   const chainId = useAppSelector(selectTransactSelectedChainId);
   const status = useAppSelector(selectTransactQuoteStatus);
-  const quoteError = useAppSelector(selectTransactQuoteError);
   const preflightOk = useAppSelector(selectTransactCrossChainPreflight);
   const slippage = useAppSelector(selectTransactSlippage);
-  const isWindowFocused = useAppSelector(selectIsWindowFocused);
-  const isNotCalmDepositError =
-    !!quoteError &&
-    QuoteCowcentratedNotCalmError.match(quoteError) &&
-    quoteError.action === 'deposit';
-  const [notCalmAutoRefresh, setNotCalmAutoRefresh] = useState(false);
-  const [stickyNotCalmWarning, setStickyNotCalmWarning] = useState(false);
-  const [notCalmRefreshSeconds, setNotCalmRefreshSeconds] = useState(NOT_CALM_REFRESH_SECONDS);
-  const [notCalmRefreshSpinning, setNotCalmRefreshSpinning] = useState(false);
-  const [notCalmSuccessLoading, setNotCalmSuccessLoading] = useState(false);
-  const notCalmRefreshTimeout = useRef<number | undefined>(undefined);
-  const notCalmSuccessLoadingTimeout = useRef<number | undefined>(undefined);
-  const showNotCalmSuccessLoading =
-    status === TransactStatus.Fulfilled && (stickyNotCalmWarning || notCalmSuccessLoading);
-  const showStickyNotCalmWarning = status === TransactStatus.Pending && stickyNotCalmWarning;
-  const showNotCalmWarning = isNotCalmDepositError || showStickyNotCalmWarning;
-  const showNotCalmRefresh = notCalmAutoRefresh && !showNotCalmSuccessLoading;
   const inputIsZero = useMemo(
     () => inputAmounts.every(amount => amount.lte(BIG_ZERO)),
     [inputAmounts]
   );
+  const { showStickyNotCalmWarning, showNotCalmRefresh } = useNotCalmAutoRefresh();
+
   const debouncedFetchQuotes = useMemo(
     () =>
       debounce(
@@ -134,128 +116,16 @@ export const TransactQuote = memo(function TransactQuote({
 
   // slippage isn't part of the if-needed change check, so force a re-quote when it changes
   const skipInitialSlippageRequote = useRef(true);
-  const skipInitialNotCalmReset = useRef(true);
   useEffect(() => {
     if (skipInitialSlippageRequote.current) {
       skipInitialSlippageRequote.current = false;
       return;
     }
-    const inputIsZero = inputAmounts.every(amount => amount.lte(BIG_ZERO));
     if (!inputIsZero && preflightOk) {
       dispatch(transactFetchQuotes());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed on slippage only
   }, [slippage]);
-
-  const handleNotCalmRefresh = useCallback(() => {
-    setNotCalmAutoRefresh(true);
-    setNotCalmRefreshSeconds(0);
-    setNotCalmRefreshSpinning(true);
-
-    if (!inputIsZero && preflightOk && status !== TransactStatus.Pending) {
-      dispatch(transactFetchQuotes());
-    }
-
-    if (notCalmRefreshTimeout.current !== undefined) {
-      window.clearTimeout(notCalmRefreshTimeout.current);
-    }
-    notCalmRefreshTimeout.current = window.setTimeout(() => {
-      setNotCalmRefreshSpinning(false);
-      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
-      notCalmRefreshTimeout.current = undefined;
-    }, 600);
-  }, [dispatch, inputIsZero, preflightOk, status]);
-
-  useEffect(() => {
-    if (isNotCalmDepositError) {
-      setNotCalmAutoRefresh(true);
-      setStickyNotCalmWarning(true);
-      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
-      setNotCalmSuccessLoading(false);
-    } else if (status === TransactStatus.Fulfilled) {
-      if (stickyNotCalmWarning && notCalmSuccessLoadingTimeout.current === undefined) {
-        setNotCalmSuccessLoading(true);
-        notCalmSuccessLoadingTimeout.current = window.setTimeout(() => {
-          setNotCalmSuccessLoading(false);
-          notCalmSuccessLoadingTimeout.current = undefined;
-        }, NOT_CALM_SUCCESS_LOADING_MS);
-      }
-      setNotCalmAutoRefresh(false);
-      setNotCalmRefreshSpinning(false);
-      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
-      setStickyNotCalmWarning(false);
-      if (notCalmRefreshTimeout.current !== undefined) {
-        window.clearTimeout(notCalmRefreshTimeout.current);
-        notCalmRefreshTimeout.current = undefined;
-      }
-    } else if (
-      status === TransactStatus.Idle ||
-      (status === TransactStatus.Rejected && quoteError)
-    ) {
-      setNotCalmAutoRefresh(false);
-      setNotCalmRefreshSpinning(false);
-      setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
-      setStickyNotCalmWarning(false);
-      setNotCalmSuccessLoading(false);
-      if (notCalmRefreshTimeout.current !== undefined) {
-        window.clearTimeout(notCalmRefreshTimeout.current);
-        notCalmRefreshTimeout.current = undefined;
-      }
-    }
-  }, [isNotCalmDepositError, quoteError, status, stickyNotCalmWarning]);
-
-  useEffect(() => {
-    if (skipInitialNotCalmReset.current) {
-      skipInitialNotCalmReset.current = false;
-      return;
-    }
-
-    setStickyNotCalmWarning(false);
-    setNotCalmAutoRefresh(false);
-    setNotCalmRefreshSpinning(false);
-    setNotCalmRefreshSeconds(NOT_CALM_REFRESH_SECONDS);
-    setNotCalmSuccessLoading(false);
-    if (notCalmRefreshTimeout.current !== undefined) {
-      window.clearTimeout(notCalmRefreshTimeout.current);
-      notCalmRefreshTimeout.current = undefined;
-    }
-  }, [chainId, inputAmounts, inputMaxes, mode, selection, selectionId]);
-
-  useEffect(() => {
-    // pause the auto-refresh while the tab is in the background so we don't keep re-quoting the
-    // zap api unattended; it resumes from the same countdown value when the tab is focused again
-    if (!notCalmAutoRefresh || notCalmRefreshSpinning || !isWindowFocused) {
-      return;
-    }
-
-    if (notCalmRefreshSeconds <= 0) {
-      handleNotCalmRefresh();
-      return;
-    }
-
-    const timeout = window.setTimeout(() => {
-      setNotCalmRefreshSeconds(seconds => Math.max(seconds - 1, 0));
-    }, 1000);
-
-    return () => window.clearTimeout(timeout);
-  }, [
-    handleNotCalmRefresh,
-    notCalmAutoRefresh,
-    notCalmRefreshSeconds,
-    notCalmRefreshSpinning,
-    isWindowFocused,
-  ]);
-
-  useEffect(() => {
-    return () => {
-      if (notCalmRefreshTimeout.current !== undefined) {
-        window.clearTimeout(notCalmRefreshTimeout.current);
-      }
-      if (notCalmSuccessLoadingTimeout.current !== undefined) {
-        window.clearTimeout(notCalmSuccessLoadingTimeout.current);
-      }
-    };
-  }, []);
 
   if (status === TransactStatus.Idle) {
     return <QuoteIdle title={title} css={cssProp} />;
@@ -265,23 +135,14 @@ export const TransactQuote = memo(function TransactQuote({
     <div className={css(cssProp)}>
       <QuoteTitleRefresh
         title={title}
-        enableRefresh={
-          status === TransactStatus.Pending ||
-          status === TransactStatus.Fulfilled ||
-          status === TransactStatus.Rejected ||
-          showNotCalmWarning
-        }
-        onRefresh={showNotCalmRefresh ? handleNotCalmRefresh : undefined}
+        enableRefresh={true}
         autoRefresh={showNotCalmRefresh}
         autoRefreshSeconds={NOT_CALM_REFRESH_SECONDS}
       />
-      {(
-        (status === TransactStatus.Pending && !showStickyNotCalmWarning) ||
-        showNotCalmSuccessLoading
-      ) ?
+      {status === TransactStatus.Pending && !showStickyNotCalmWarning ?
         <QuoteLoading />
       : null}
-      {status === TransactStatus.Fulfilled && !showNotCalmSuccessLoading ?
+      {status === TransactStatus.Fulfilled ?
         <QuoteLoaded />
       : null}
       {status === TransactStatus.Rejected || showStickyNotCalmWarning ?
