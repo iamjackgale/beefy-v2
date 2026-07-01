@@ -2305,12 +2305,13 @@
     "earnedTokenAddress": "0x9D678b6215F783f8306BD256934b4AE696C8493C",
     "oracle": "lps",
     "oracleId": "pendle-reusde-25jun26",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1767597699,
+    "retireReason": "rewards",
+    "retiredAt": 1782886702,
     "platformId": "magpie",
     "assets": ["reUSDe"],
     "migrationIds": ["magpie"],
-    "pointStructureIds": ["re.xyz", "ethena"],
     "risks": {
       "complex": false,
       "curated": false,
@@ -2324,6 +2325,7 @@
     "strategyTypeId": "multi-lp",
     "addLiquidityUrl": "https://app.pendle.finance/trade/pools/0x6CB9A013604A567a5834fadD411165B1ca616783/zap/in?chain=ethereum",
     "removeLiquidityUrl": "https://app.pendle.finance/trade/pools/0x6CB9A013604A567a5834fadD411165B1ca616783/zap/out?chain=ethereum",
+    "pointStructureIds": ["re.xyz", "ethena"],
     "network": "ethereum"
   },
   {
@@ -2339,13 +2341,13 @@
     "earnedTokenAddress": "0xe82dd383D450054bF685331739eAddEc11eb69DA",
     "oracle": "lps",
     "oracleId": "pendle-reusd-25jun26",
-    "status": "active",
+    "status": "eol",
     "createdAt": 1767597699,
+    "retireReason": "rewards",
+    "retiredAt": 1782886702,
     "platformId": "magpie",
     "assets": ["reUSDxyz"],
-    "icons": ["reUSDxyz"],
     "migrationIds": ["magpie"],
-    "pointStructureIds": ["re.xyz", "ethena"],
     "risks": {
       "complex": false,
       "curated": false,
@@ -2359,7 +2361,9 @@
     "strategyTypeId": "multi-lp",
     "addLiquidityUrl": "https://app.pendle.finance/trade/pools/0xf5929a1C332ceaB7918A4593a43Db2B9aC20095f/zap/in?chain=ethereum",
     "removeLiquidityUrl": "https://app.pendle.finance/trade/pools/0xf5929a1C332ceaB7918A4593a43Db2B9aC20095f/zap/out?chain=ethereum",
-    "network": "ethereum"
+    "pointStructureIds": ["re.xyz", "ethena"],
+    "network": "ethereum",
+    "icons": ["reUSDxyz"]
   },
   {
     "id": "balancerv3-ethereum-oseth-waethweth",
