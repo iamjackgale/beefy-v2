@@ -292,7 +292,7 @@
     "status": "active",
     "createdAt": 1789282822,
     "platformId": "uniswap",
-    "assets": ["rhINDEX", "WETH"],
+    "assets": ["Index", "WETH"],
     "risks": {
       "complex": true,
       "curated": false,
@@ -333,7 +333,7 @@
     "platformId": "beefy",
     "feeTier": "1",
     "tickSpacing": 200,
-    "assets": ["rhINDEX", "WETH"],
+    "assets": ["Index", "WETH"],
     "risks": {
       "complex": true,
       "curated": false,
